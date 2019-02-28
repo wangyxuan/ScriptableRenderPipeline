@@ -15,6 +15,6 @@ SLSG_SpecC_1 : SLSG_SpecColor_Aniso_DualLobeDirect.ShaderGraph
 SLSG_SpecC_2 : SLSG_SpecColor_Aniso_DualLobeDirect_Coat_CoatNormal_SpecOcc_AnisoAreaLights.ShaderGraph
 SLSG_SpecC_3 : SLSG_SpecColor_Aniso_DualLobeHaze_SpecOcc_AnisoAreaLights.ShaderGraph
 
-
+SLSG_SpecC_4 : (from SpecC1, to test bent AO fixup)
 
 
