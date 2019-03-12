@@ -1038,8 +1038,10 @@ float GetModifiedAnisotropy(float anisotropy, float perceptualRoughness, float r
 #ifdef STACKLIT_DEBUG
     factor = _DebugAniso.w;
 #endif
-    float newAniso = anisotropy * (r  + (1-r) * clamp(factor*roughness*roughness,0,1));
-
+    //float newAniso = anisotropy * (r  + (1-r) * (1-newPerceptualRoughness)*(1-newPerceptualRoughness)
+    //                                          * clamp(factor*roughness*roughness,0,1));
+    //float newAniso = anisotropy * (r  + (1-r) * clamp(factor*roughness*roughness,0,1));
+    float newAniso = anisotropy * r;
     return newAniso;
 }
 
@@ -1548,10 +1550,10 @@ void ComputeAdding(float _cti, float3 V, in BSDFData bsdfData, inout PreLightDat
 
         // Evaluate the adding operator on the normalized variance
         _s_r0m = s_ti0 + j0i*(s_t0i + s_r12 + m_rr*(s_r12+s_ri0));
-        float _s_r0i = (r0i*s_r0i + m_r0i*_s_r0m) / e_r0i;
+        float _s_r0i = (r0i*s_r0i + m_r0i*_s_r0m); // e_r0i;
         float _s_t0i = j12*s_t0i + s_t12 + j12*(s_r12 + s_ri0)*m_rr;
         float _s_rim = s_t12 + j12*(s_t21 + s_ri0 + m_rr*(s_r12+s_ri0));
-        float _s_ri0 = (r21*s_r21 + m_ri0*_s_rim) / e_ri0;
+        float _s_ri0 = (r21*s_r21 + m_ri0*_s_rim); // e_ri0;
         float _s_ti0 = ji0*s_t21 + s_ti0 + ji0*(s_r12 + s_ri0)*m_rr;
         _s_r0i = (e_r0i > 0.0) ? _s_r0i/e_r0i : 0.0;
         _s_ri0 = (e_ri0 > 0.0) ? _s_ri0/e_ri0 : 0.0;
@@ -1568,7 +1570,9 @@ void ComputeAdding(float _cti, float3 V, in BSDFData bsdfData, inout PreLightDat
 
 
         // Update mean
-        cti = ctt;
+        // Avoid grazing angle black artefacts and instead of 
+        // cti = ctt;
+        cti = ClampNdotV(ctt);
 
         // We need to escape this update on the last vlayer iteration,
         // as we will use a hack to compute all needed bottom layer
