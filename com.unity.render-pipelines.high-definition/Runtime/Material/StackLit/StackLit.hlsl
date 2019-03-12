@@ -1979,6 +1979,28 @@ void PreLightData_SetupAreaLightsAniso(BSDFData bsdfData, float3 V, float3 N[NB_
 #endif
 } // PreLightData_SetupAreaLightsAniso
 
+// See PreLightData_SetupOcclusion(): when we require something equivalent to a "diffuse color tint" but for the specular BSDF,
+// we will use this:
+float3 GetApproximatedBottomFresnel0ForTint(BSDFData bsdfData, PreLightData preLightData)
+{
+    float3 bottomF0;
+    if( IsVLayeredEnabled(bsdfData) )
+    {
+        bottomF0 = preLightData.vLayerEnergyCoeff[BOTTOM_VLAYER_IDX];
+    }
+    else
+    {
+        if (HasFlag(bsdfData.materialFeatures, MATERIALFEATUREFLAGS_STACK_LIT_IRIDESCENCE))
+        {
+            bottomF0 = preLightData.fresnelIridforCalculatingFGD;
+        }
+        else
+        {
+            bottomF0 = bsdfData.fresnel0;
+        }
+    }
+    return bottomF0;
+}
 
 // From SPTDistribution.hlsl:
 
@@ -2124,21 +2146,7 @@ void PreLightData_SetupOcclusion(PositionInputs posInput, BSDFData bsdfData, flo
 
     // For fresnel0 to use with GTAOMultiBounce for the bottom interface, since it's already a hack on an empirical fit
     // (empirical fit done for diffuse), we will try to use something we already calculated and should offer a proper tint:
-    if( IsVLayeredEnabled(bsdfData) )
-    {
-        bottomF0 = preLightData.vLayerEnergyCoeff[BOTTOM_VLAYER_IDX];
-    }
-    else
-    {
-        if (HasFlag(bsdfData.materialFeatures, MATERIALFEATUREFLAGS_STACK_LIT_IRIDESCENCE))
-        {
-            bottomF0 = preLightData.fresnelIridforCalculatingFGD;
-        }
-        else
-        {
-            bottomF0 = bsdfData.fresnel0;
-        }
-    }
+    bottomF0 = GetApproximatedBottomFresnel0ForTint(bsdfData, preLightData);
 
     // We calculate the screen space AO-derived SO and then the one based on data (baked) values.
     // There is one such pair of SO value per lobe. Screen space values will be combined with min( , ) with data-based calculated SO.
@@ -2566,7 +2574,7 @@ void ModifyBakedDiffuseLighting(float3 V, PositionInputs posInput, SurfaceData s
     // preLightData.diffuseEnergy will be 1,1,1 if no vlayering or no VLAYERED_DIFFUSE_ENERGY_HACKED_TERM
     // Note: When baking reflection probes, we approximate the diffuse with the fresnel0
     builtinData.bakeDiffuseLighting *= ReplaceDiffuseForReflectionPass(bsdfData.fresnel0)
-        ? bsdfData.fresnel0
+        ? GetApproximatedBottomFresnel0ForTint(bsdfData, preLightData)
         : preLightData.diffuseFGD * preLightData.diffuseEnergy * bsdfData.diffuseColor;
 
     // The lobe specific specular occlusion data, along with the result of the screen space occlusion sampling 
