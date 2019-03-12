@@ -326,6 +326,8 @@ $include("SharedCode.template.hlsl")
         // setup defaults -- these are used if the graph doesn't output a value
         ZERO_INITIALIZE(SurfaceData, surfaceData);
 
+        $CoatMaskOne: surfaceData.coatMask = 1.0;
+
         // Copy graph values to surfaceData, if defined
         $SurfaceDescription.BaseColor:                 surfaceData.baseColor =                surfaceDescription.BaseColor;
         $SurfaceDescription.SubsurfaceMask:            surfaceData.subsurfaceMask =           surfaceDescription.SubsurfaceMask;
@@ -333,6 +335,8 @@ $include("SharedCode.template.hlsl")
         $SurfaceDescription.DiffusionProfileHash:      surfaceData.diffusionProfileHash =     asuint(surfaceDescription.DiffusionProfileHash);
         $SurfaceDescription.IridescenceMask:           surfaceData.iridescenceMask =          surfaceDescription.IridescenceMask;
         $SurfaceDescription.IridescenceThickness:      surfaceData.iridescenceThickness =     surfaceDescription.IridescenceThickness;
+        $SurfaceDescription.IridescenceCoatFixupTIR:   surfaceData.iridescenceCoatFixupTIR =  surfaceDescription.IridescenceCoatFixupTIR;
+        $SurfaceDescription.IridescenceCoatFixupTIRClamp: surfaceData.iridescenceCoatFixupTIRClamp =  surfaceDescription.IridescenceCoatFixupTIRClamp;
         $SurfaceDescription.SpecularColor:             surfaceData.specularColor =            surfaceDescription.SpecularColor;
         $SurfaceDescription.DielectricIor:             surfaceData.dielectricIor =            surfaceDescription.DielectricIor;
         $SurfaceDescription.Metallic:                  surfaceData.metallic =                 surfaceDescription.Metallic;
@@ -348,6 +352,7 @@ $include("SharedCode.template.hlsl")
         $SurfaceDescription.AnisotropyA:               surfaceData.anisotropyA =              surfaceDescription.AnisotropyA;
         $SurfaceDescription.AnisotropyB:               surfaceData.anisotropyB =              surfaceDescription.AnisotropyB;
         $SurfaceDescription.CoatSmoothness:            surfaceData.coatPerceptualSmoothness = surfaceDescription.CoatSmoothness;
+        $SurfaceDescription.CoatMask:                  surfaceData.coatMask =                 surfaceDescription.CoatMask;
         $SurfaceDescription.CoatIor:                   surfaceData.coatIor =                  surfaceDescription.CoatIor;
         $SurfaceDescription.CoatThickness:             surfaceData.coatThickness =            surfaceDescription.CoatThickness;
         $SurfaceDescription.CoatExtinction:            surfaceData.coatExtinction =           surfaceDescription.CoatExtinction;

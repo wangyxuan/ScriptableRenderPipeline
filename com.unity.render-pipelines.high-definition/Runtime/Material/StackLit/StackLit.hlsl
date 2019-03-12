@@ -360,18 +360,25 @@ void FillMaterialAnisotropy(float anisotropyA, float anisotropyB, float3 tangent
     bsdfData.bitangentWS = bitangentWS;
 }
 
-void FillMaterialIridescence(float mask, float thickness, float ior, inout BSDFData bsdfData)
+void FillMaterialIridescence(float mask, float thickness, float ior, float iridescenceCoatFixupTIR, float iridescenceCoatFixupTIRClamp, inout BSDFData bsdfData)
 {
     bsdfData.iridescenceMask = mask;
     bsdfData.iridescenceThickness = thickness;
     bsdfData.iridescenceIor = ior;
+    bsdfData.iridescenceCoatFixupTIR = iridescenceCoatFixupTIR;
+    bsdfData.iridescenceCoatFixupTIRClamp = iridescenceCoatFixupTIRClamp;
 }
 
-void FillMaterialCoatData(float coatPerceptualRoughness, float coatIor, float coatThickness, float3 coatExtinction, inout BSDFData bsdfData)
+void FillMaterialCoatData(float coatPerceptualRoughness, float coatMask, float coatIor, float coatThickness, float3 coatExtinction, inout BSDFData bsdfData)
 {
     bsdfData.coatPerceptualRoughness = coatPerceptualRoughness;
-    bsdfData.coatIor        = coatIor;
-    bsdfData.coatThickness  = coatThickness;
+    // Hack: A true coatMask would lead to complications like additionnal base lobes unmodified by the coat,
+    // in proportion to 1-coatMask. We lerp the ior with 1 here along with thickness to 0 so that Beer-Lambert attenuation
+    // is removed as coatMask -> 0. Some series term in ComputeStatistics are also lerped with their proper neutral values, along
+    // with pre-integrated FGD terms (to lerp them to 0).
+    bsdfData.coatMask       = coatMask;
+    bsdfData.coatIor        = lerp(1.0, coatIor, bsdfData.coatMask);
+    bsdfData.coatThickness  = coatThickness * bsdfData.coatMask;
     bsdfData.coatExtinction = coatExtinction;
 }
 
@@ -743,13 +750,14 @@ BSDFData ConvertSurfaceDataToBSDFData(uint2 positionSS, SurfaceData surfaceData)
 
     if (HasFlag(surfaceData.materialFeatures, MATERIALFEATUREFLAGS_STACK_LIT_IRIDESCENCE))
     {
-        FillMaterialIridescence(surfaceData.iridescenceMask, surfaceData.iridescenceThickness, surfaceData.iridescenceIor, bsdfData);
+        FillMaterialIridescence(surfaceData.iridescenceMask, surfaceData.iridescenceThickness, surfaceData.iridescenceIor,
+                                surfaceData.iridescenceCoatFixupTIR, surfaceData.iridescenceCoatFixupTIRClamp, bsdfData);
     }
 
     if (HasFlag(surfaceData.materialFeatures, MATERIALFEATUREFLAGS_STACK_LIT_COAT))
     {
         FillMaterialCoatData(PerceptualSmoothnessToPerceptualRoughness(surfaceData.coatPerceptualSmoothness),
-                             surfaceData.coatIor, surfaceData.coatThickness, surfaceData.coatExtinction, bsdfData);
+                             surfaceData.coatMask, surfaceData.coatIor, surfaceData.coatThickness, surfaceData.coatExtinction, bsdfData);
 
         if (HasFlag(surfaceData.materialFeatures, MATERIALFEATUREFLAGS_STACK_LIT_COAT_NORMAL_MAP))
         {
@@ -1324,6 +1332,7 @@ void ComputeStatistics(in  float  cti, in float3 V, in float3 vOrthoGeomN, in bo
             // Moreover, we don't consider offspecular effect as well as never outputting final downward lobes anyway, so we
             // never output the means but just track them as cosines of angles (cti) for energy transfer calculations
             // (should do with FGD but depends, see comments above).
+
             const float alpha = bsdfData.coatRoughness;
             const float scale = clamp((1.0-alpha)*(sqrt(1.0-alpha) + alpha), 0.0, 1.0);
             //http://www.wolframalpha.com/input/?i=f(alpha)+%3D+(1.0-alpha)*(sqrt(1.0-alpha)+%2B+alpha)+alpha+%3D+0+to+1
@@ -1339,7 +1348,11 @@ void ComputeStatistics(in  float  cti, in float3 V, in float3 vOrthoGeomN, in bo
         }
 
         // Update variance
-        s_r12 = RoughnessToLinearVariance(bsdfData.coatRoughness);
+
+        // coatMask hack: See FillMaterialCoatData.
+        // Here we just lerp linearized variance to 0 here.
+        // Note that ctt -> cti when coatMask -> 0, so s_t12 is left as is. Same for jacobian terms
+        s_r12 = RoughnessToLinearVariance(bsdfData.coatRoughness) * bsdfData.coatMask;
         s_t12 = RoughnessToLinearVariance(bsdfData.coatRoughness * 0.5 * abs((ctt*n12 - cti)/(ctt*n12)));
         j12   = (ctt/cti)*n12;
 
@@ -1354,7 +1367,11 @@ void ComputeStatistics(in  float  cti, in float3 V, in float3 vOrthoGeomN, in bo
         // TODO: if TIR is permitted by UI, do this, or early out
         //float stopFactor = float(cti > 0.0);
         //T12 = stopFactor * exp(- bsdfData.coatThickness * bsdfData.coatExtinction / cti);
-        // Update energy
+
+        // coatMask hack: See FillMaterialCoatData. We already have modified coatThickness
+        // and this will reduce Beer-Lambert attenuation here when the mask goes to 0
+
+        // Update energy:
         R12 = float3(0.0, 0.0, 0.0);
         T12 = exp(- bsdfData.coatThickness * bsdfData.coatExtinction / cti);
         R21 = R12;
@@ -1398,14 +1415,51 @@ void ComputeStatistics(in  float  cti, in float3 V, in float3 vOrthoGeomN, in bo
         {
             if (bsdfData.iridescenceMask > 0.0)
             {
-                //float topIor = bsdfData.coatIor;
-                // TODO:
-                // We will avoid using coatIor directly as with the fake refraction, it can cause TIR
+                // float topIor = bsdfData.coatIor;
+                //
+                // Hack: (see also the last parameter of EvalIridescence() that we don't set)
+                //
+                // We will avoid using coatIor directly as with the refraction, it can cause TIR
                 // which even when handled in EvalIridescence (tested), doesn't look pleasing and
                 // creates a discontinuity.
-                float scale = clamp((1.0-bsdfData.coatPerceptualRoughness), 0.0, 1.0);
-                float topIor = lerp(1.0001, bsdfData.coatIor, scale);
-                R12 = lerp(R12, EvalIridescence(topIor, ctiForFGD, bsdfData.iridescenceThickness, bsdfData.fresnel0), bsdfData.iridescenceMask);
+                //
+                // This fixup is configurable and applied via two terms:
+                //
+                // k1:
+                //
+                // First, note our average refracted lobe direction stat is modulated by the roughness:
+                // The more roughness the coat has, the less we make our average lobe direction stat be
+                // affected by refraction. Since this will make the incoming directions less compressed
+                // wrt to the normal, TIR in iridescence due to the coatIor is more likely to happen.
+                //
+                // We noted the lerpfactor curve to make the iridescence effect cover the whole 0-90 degrees
+                // angular range with 90-eps degrees just short of causing TIR vs the input coatPerceptualRoughness.
+                // We fitted this curve with a cubic polynomial.
+                // This gives us our lerpfactor to lerp down the coatIor closer to air.
+                //
+                // The first fixup is configured to keep TIR just out of the whole possible NdotV range,
+                // but this is also dependent on iridescenceThickness. The first factor works for
+                // iridescenceThickness = 1, but lowering iridescenceThickness will push the TIR border further
+                // out toward the grazing angle.
+                // A second fixup can be used to clamp the TIR border fixed by the first fixup factor,
+                // regardless of iridescenceThickness.
+                // Both are handy artistic options when wanting to animate or map (or anything else in a
+                // shadergraph) coatIor, coatPerceptualSmoothness and iridescenceThickness.
+                float k1 = 1.0;
+                float k2 = 1.0;
+                float scale = bsdfData.coatPerceptualRoughness;
+                k1 = bsdfData.iridescenceCoatFixupTIR * saturate(0.003333915 - 0.1675957*scale + 2.571426*scale*scale - 1.406338*scale*scale*scale);
+                k2 = lerp(1.0, (2.0 - bsdfData.iridescenceThickness), bsdfData.iridescenceCoatFixupTIRClamp); // See EvalIridescence in BSDF.hlsl for why "2-iridescenceThickness"
+                float topIor = k2 * lerp(bsdfData.coatIor, 1.0001, k1);
+                // Because of the coatMask, we also store independently the iridescence evaluation in preLightData for lights to be evaluated
+                // with BSDF(), as normally without coat we do not use the NdotV-based terms (see R12 F_Schlick evaluation with ctiForFGD just
+                // above) calculated in ComputeAdding for fresnel but the true LdotH. So for the coatMask hack, we need a separate iridescence
+                // fresnel (stored here), combined with an F_Schlick(bsdfData.fresnel0, LdotH) term, the later evaluated in BSDF().
+                //
+                // We also need to store the iridescent fresnel term for the split-sum lights for the coatMask = 0 endpoint, since in
+                // GetPreLightData, we assume EvalIridescence is done here (avoid double computation).
+                preLightData.fresnelIridforCalculatingFGD = EvalIridescence(topIor, ctiForFGD, bsdfData.iridescenceThickness, bsdfData.fresnel0);
+                R12 = lerp(R12, preLightData.fresnelIridforCalculatingFGD, bsdfData.iridescenceMask);
             }
         }
 
@@ -1664,7 +1718,6 @@ void ComputeAdding(float _cti, float3 V, in BSDFData bsdfData, inout PreLightDat
     preLightData.iblAnisotropy[0] = bsdfData.anisotropyA;
     preLightData.iblAnisotropy[1] = bsdfData.anisotropyB;
 
-
     s_r12 = RoughnessToLinearVariance(PerceptualRoughnessToRoughness(bsdfData.perceptualRoughnessA));
     _s_r0m = s_ti0 + j0i*(s_t0i + s_r12 + m_rr*(s_r12+s_ri0));
     preLightData.iblPerceptualRoughness[BASE_LOBEA_IDX] = LinearVarianceToPerceptualRoughness(_s_r0m);
@@ -1830,7 +1883,8 @@ void ComputeAdding(float _cti, float3 V, in BSDFData bsdfData, inout PreLightDat
 
 #ifdef VLAYERED_DIFFUSE_ENERGY_HACKED_TERM
     // TODO
-    preLightData.diffuseEnergy = Ti0;
+    // coatMask hack: See FillMaterialCoatData.
+    preLightData.diffuseEnergy = lerp(float3(1.0, 1.0, 1.0), Ti0, bsdfData.coatMask);
     // Not correct since these stats are still directional probably too much
     // removed, but with a non FGD term, could actually balance out (as using
     // FGD would lower this)
@@ -2319,8 +2373,19 @@ PreLightData GetPreLightData(float3 V, PositionInputs posInput, inout BSDFData b
             diffuseFGDTmp,
             specularReflectivity[COAT_LOBE_IDX]);
 
-        // This is for the base FGD fetches factored out of "if vlayering or not": 
+        // We apply the coatMask here since even an f0 of 0 in the fetch above will give a 
+        // directional albedo (aka specular reflectivity) that is non zero:
+        preLightData.specularFGD[COAT_LOBE_IDX] *= bsdfData.coatMask;
+        // This is for the base FGD fetches factored out of "if vlayering or not":
         f0forCalculatingFGD = preLightData.vLayerEnergyCoeff[BOTTOM_VLAYER_IDX];
+        // We need to lerp with coatMask here too since with "deferred" (out of ComputeAdding)
+        // pre-integrated FGD fetches, we will have a F_Schlick term in the energy coefficient
+        // and not the interface fresnel0 directly. Also, we first lerp the coatMask = 0 endpoint
+        // to include iridescence:
+        f0forCalculatingFGD = lerp(lerp(bsdfData.fresnel0, preLightData.fresnelIridforCalculatingFGD, bsdfData.iridescenceMask),
+                                   f0forCalculatingFGD,
+                                   bsdfData.coatMask);
+
 
     } // ...if( IsVLayeredEnabled(bsdfData) )
     else
@@ -2972,12 +3037,26 @@ void CalculateAnisoAngles(BSDFData bsdfData, float3 H, float3 L, float3 V, out f
     BdotL = dot(bsdfData.bitangentWS, L);
 }
 
+void BSDF_ModifyFresnelForIridescence(BSDFData bsdfData, PreLightData preLightData, inout float3 F)
+{
+        if (HasFlag(bsdfData.materialFeatures, MATERIALFEATUREFLAGS_STACK_LIT_IRIDESCENCE))
+        {
+            float3 fresnelIridescent = preLightData.fresnelIridforCalculatingFGD;
+
+#ifdef IRIDESCENCE_RECOMPUTE_PERLIGHT
+            float topIor = 1.0; // default air on top.
+            fresnelIridescent = EvalIridescence(topIor, savedLdotH, bsdfData.iridescenceThickness, bsdfData.fresnel0);
+#endif
+            F = lerp(F, fresnelIridescent, bsdfData.iridescenceMask);
+        }
+}
+
 // This function is the core BSDF evaluation for analytical dirac-rays light (point and directional).
 // (Reminder, lights are:
 //  -point/directional: fully analytical integral[LFGD] which evaluates directly because of the dirac L.
 //  -environments: split-sum, pre-integrated LD split from pre-integrated FGD
 //  -LTC area lights: split-sum, analytical L, pre-integrated FGD, like environment
-//  -SSR TODO for StackLit )
+//  -SSR)
 //
 // Assumes that NdotL is positive.
 void BSDF2(float3 inV, float3 inL, float inNdotL, float3 positionWS, PreLightData preLightData, BSDFData bsdfData,
@@ -3052,7 +3131,29 @@ void BSDF2(float3 inV, float3 inL, float inNdotL, float3 positionWS, PreLightDat
         IF_DEBUG( if(_DebugLobeMask.y == 0.0) DV[BASE_LOBEA_IDX] = (float3)0; )
         IF_DEBUG( if(_DebugLobeMask.z == 0.0) DV[BASE_LOBEB_IDX] = (float3)0; )
 
-        specularLighting =  max(0, NdotL[DNLV_BASE_IDX]) * preLightData.vLayerEnergyCoeff[BOTTOM_VLAYER_IDX]
+#if 1 //coatMask with proper lerped terms
+
+        // Support for the coatMask hack costs us an additional F_Schlick evaluation if we want to lerp
+        // properly to the LdotH fresnel term that we normally get without coat:
+        // This is because in ComputeAdding, the energy coefficients are (either) (FGD based TODOENERGY or)
+        // Schlick but even with Schlick, it is with NdotV, not LdotH like we have here.
+        float3 bottomF;
+
+#ifdef VLAYERED_RECOMPUTE_PERLIGHT // && VLAYERED which we are in this context, also: TODOENERGY: && COMPUTEADDING_DEFERRED_PREINT_FGD_FETCHES
+        // In that case, preLightData.vLayerEnergyCoeff[BOTTOM_VLAYER_IDX] will contain an F_Schlick term
+        // anyways (with other factors as usual for the stack) and possibly mixed or replaced by the iridescence term.
+        bottomF = preLightData.vLayerEnergyCoeff[BOTTOM_VLAYER_IDX];
+#else
+        // If we don't recompute the stack per dirac lights, we ensure the coatmask make us lerp
+        // to the usual LdotH Schlick term.
+        bottomF = F_Schlick(bsdfData.fresnel0, savedLdotH);
+        BSDF_ModifyFresnelForIridescence(bsdfData, preLightData, bottomF);
+#endif
+
+        bottomF = lerp(bottomF, preLightData.vLayerEnergyCoeff[BOTTOM_VLAYER_IDX], bsdfData.coatMask);
+#endif // ...coatMask with proper lerped terms
+
+        specularLighting =  max(0, NdotL[DNLV_BASE_IDX]) * bottomF
                           * lerp(DV[BASE_LOBEA_IDX] * preLightData.energyCompensationFactor[BASE_LOBEA_IDX],
                                  DV[BASE_LOBEB_IDX] * preLightData.energyCompensationFactor[BASE_LOBEB_IDX],
                                  bsdfData.lobeMix);
@@ -3071,16 +3172,7 @@ void BSDF2(float3 inV, float3 inL, float inNdotL, float3 positionWS, PreLightDat
         // TODO: Proper Fresnel
         float3 F = F_Schlick(bsdfData.fresnel0, savedLdotH);
 
-        if (HasFlag(bsdfData.materialFeatures, MATERIALFEATUREFLAGS_STACK_LIT_IRIDESCENCE))
-        {
-            float3 fresnelIridescent = preLightData.fresnelIridforCalculatingFGD;
-
-#ifdef IRIDESCENCE_RECOMPUTE_PERLIGHT
-            float topIor = 1.0; // default air on top.
-            fresnelIridescent = EvalIridescence(topIor, savedLdotH, bsdfData.iridescenceThickness, bsdfData.fresnel0);
-#endif
-            F = lerp(F, fresnelIridescent, bsdfData.iridescenceMask);
-        }
+        BSDF_ModifyFresnelForIridescence(bsdfData, preLightData, F);
 
         if (HasFlag(bsdfData.materialFeatures, MATERIALFEATUREFLAGS_STACK_LIT_ANISOTROPY))
         {

@@ -136,16 +136,22 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             public float anisotropyB; // anisotropic ratio(0->no isotropic; 1->full anisotropy in tangent direction, -1->full anisotropy in bitangent direction)
 
             // Iridescence
-            [SurfaceDataAttributes("IridescenceIor")]
+            [SurfaceDataAttributes("Iridescence Ior")]
             public float iridescenceIor;
-            [SurfaceDataAttributes("IridescenceThickness")]
+            [SurfaceDataAttributes("Iridescence Layer Thickness")]
             public float iridescenceThickness;
             [SurfaceDataAttributes("Iridescence Mask")]
             public float iridescenceMask;
+            [SurfaceDataAttributes("Iridescence Coat Fixup TIR")]
+            public float iridescenceCoatFixupTIR;
+            [SurfaceDataAttributes("Iridescence Coat Fixup TIR Clamp")]
+            public float iridescenceCoatFixupTIRClamp;
 
             // Top interface and media (clearcoat)
             [SurfaceDataAttributes("Coat Smoothness")]
             public float coatPerceptualSmoothness;
+            [SurfaceDataAttributes("Coat mask")]
+            public float coatMask;
             [SurfaceDataAttributes("Coat IOR")]
             public float coatIor;
             [SurfaceDataAttributes("Coat Thickness")]
@@ -222,6 +228,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             // Top interface and media (clearcoat)
             public float coatRoughness;
             public float coatPerceptualRoughness;
+            public float coatMask;
             public float coatIor;
             public float coatThickness;
             public Vector3 coatExtinction;
@@ -230,6 +237,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             public float iridescenceIor;
             public float iridescenceThickness;
             public float iridescenceMask;
+            public float iridescenceCoatFixupTIR;
+            public float iridescenceCoatFixupTIRClamp;
 
             // SSS
             public uint diffusionProfileIndex;

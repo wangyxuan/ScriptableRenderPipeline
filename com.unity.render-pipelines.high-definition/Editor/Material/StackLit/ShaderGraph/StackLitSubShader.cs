@@ -40,6 +40,8 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 StackLitMasterNode.DiffusionProfileHashSlotId,
                 StackLitMasterNode.IridescenceMaskSlotId,
                 StackLitMasterNode.IridescenceThicknessSlotId,
+                StackLitMasterNode.IridescenceCoatFixupTIRSlotId,
+                StackLitMasterNode.IridescenceCoatFixupTIRClampSlotId,
                 StackLitMasterNode.SpecularColorSlotId,
                 StackLitMasterNode.DielectricIorSlotId,
                 StackLitMasterNode.MetallicSlotId,
@@ -58,6 +60,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 StackLitMasterNode.CoatThicknessSlotId,
                 StackLitMasterNode.CoatExtinctionSlotId,
                 StackLitMasterNode.CoatNormalSlotId,
+                StackLitMasterNode.CoatMaskSlotId,
                 StackLitMasterNode.LobeMixSlotId,
                 StackLitMasterNode.HazinessSlotId,
                 StackLitMasterNode.HazeExtentSlotId,
@@ -341,6 +344,8 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 StackLitMasterNode.DiffusionProfileHashSlotId,
                 StackLitMasterNode.IridescenceMaskSlotId,
                 StackLitMasterNode.IridescenceThicknessSlotId,
+                StackLitMasterNode.IridescenceCoatFixupTIRSlotId,
+                StackLitMasterNode.IridescenceCoatFixupTIRClampSlotId,
                 StackLitMasterNode.SpecularColorSlotId,
                 StackLitMasterNode.DielectricIorSlotId,
                 StackLitMasterNode.MetallicSlotId,
@@ -359,6 +364,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 StackLitMasterNode.CoatThicknessSlotId,
                 StackLitMasterNode.CoatExtinctionSlotId,
                 StackLitMasterNode.CoatNormalSlotId,
+                StackLitMasterNode.CoatMaskSlotId,
                 StackLitMasterNode.LobeMixSlotId,
                 StackLitMasterNode.HazinessSlotId,
                 StackLitMasterNode.HazeExtentSlotId,
@@ -632,6 +638,24 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             if (masterNode.coat.isOn)
             {
                 activeFields.Add("Material.Coat");
+                if (pass.PixelShaderUsesSlot(StackLitMasterNode.CoatMaskSlotId))
+                {
+                    var coatMaskSlot = masterNode.FindSlot<Vector1MaterialSlot>(StackLitMasterNode.CoatMaskSlotId);
+                    bool connected = masterNode.IsSlotConnected(StackLitMasterNode.CoatMaskSlotId);
+
+                    if (connected || (coatMaskSlot.value != 0.0f && coatMaskSlot.value != 1.0f))
+                    {
+                        activeFields.Add("CoatMask");
+                    }
+                    else if (coatMaskSlot.value == 0.0f)
+                    {
+                        activeFields.Add("CoatMaskZero");
+                    }
+                    else if (coatMaskSlot.value == 1.0f)
+                    {
+                        activeFields.Add("CoatMaskOne");
+                    }
+                }
             }
             if (masterNode.coatNormal.isOn)
             {

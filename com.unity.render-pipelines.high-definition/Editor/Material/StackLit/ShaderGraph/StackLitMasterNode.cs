@@ -33,6 +33,8 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
         public const string IridescenceMaskSlotName = "IridescenceMask";
         public const string IridescenceThicknessSlotName = "IridescenceThickness";
+        public const string IridescenceCoatFixupTIRSlotName = "IridescenceCoatFixupTIR";
+        public const string IridescenceCoatFixupTIRClampSlotName = "IridescenceCoatFixupTIRClamp";
 
         public const string SpecularColorSlotName = "SpecularColor";
         public const string MetallicSlotName = "Metallic";
@@ -56,6 +58,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
         public const string CoatThicknessSlotName = "CoatThickness";
         public const string CoatExtinctionSlotName = "CoatExtinction";
         public const string CoatNormalSlotName = "CoatNormal";
+        public const string CoatMaskSlotName = "CoatMask";
 
         public const string LobeMixSlotName = "LobeMix";
         public const string HazinessSlotName = "Haziness";
@@ -115,6 +118,10 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
         public const int SOFixupVisibilityRatioThresholdSlotId = 36;
         public const int SOFixupStrengthFactorSlotId = 37;
         public const int SOFixupMaxAddedRoughnessSlotId = 38;
+
+        public const int CoatMaskSlotId = 39;
+        public const int IridescenceCoatFixupTIRSlotId = 40;
+        public const int IridescenceCoatFixupTIRClampSlotId = 41;
 
         // TODO: we would ideally need one value per lobe
         //public const int SpecularOcclusionSlotId = ; // for custom (external) SO replacing data based SO (which comes from DataBasedSOMode(dataAO, optional bent normal))
@@ -882,6 +889,9 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                     AddSlot(new NormalMaterialSlot(CoatNormalSlotId, CoatNormalSlotName, CoatNormalSlotName, CoordinateSpace.Tangent, ShaderStageCapability.Fragment));
                     validSlots.Add(CoatNormalSlotId);
                 }
+
+                AddSlot(new Vector1MaterialSlot(CoatMaskSlotId, CoatMaskSlotName, CoatMaskSlotName, SlotType.Input, 1.0f, ShaderStageCapability.Fragment));
+                validSlots.Add(CoatMaskSlotId);
             }
 
             if (dualSpecularLobe.isOn)
@@ -920,6 +930,13 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 validSlots.Add(IridescenceMaskSlotId);
                 AddSlot(new Vector1MaterialSlot(IridescenceThicknessSlotId, IridescenceThicknessSlotName, IridescenceThicknessSlotName, SlotType.Input, 0.0f, ShaderStageCapability.Fragment));
                 validSlots.Add(IridescenceThicknessSlotId);
+                if (coat.isOn)
+                {
+                    AddSlot(new Vector1MaterialSlot(IridescenceCoatFixupTIRSlotId, IridescenceCoatFixupTIRSlotName, IridescenceCoatFixupTIRSlotName, SlotType.Input, 0.0f, ShaderStageCapability.Fragment));
+                    validSlots.Add(IridescenceCoatFixupTIRSlotId);
+                    AddSlot(new Vector1MaterialSlot(IridescenceCoatFixupTIRClampSlotId, IridescenceCoatFixupTIRClampSlotName, IridescenceCoatFixupTIRClampSlotName, SlotType.Input, 0.0f, ShaderStageCapability.Fragment));
+                    validSlots.Add(IridescenceCoatFixupTIRClampSlotId);
+                }
             }
 
             if (subsurfaceScattering.isOn)
