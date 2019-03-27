@@ -13,6 +13,11 @@
 // see SPTDistribution.hlsl:ApplyBentSpecularOcclusionFixups() if other methods are added
 #define BENT_VISIBILITY_FROM_AO_COS_BENT_CORRECTION 2
 
+// See StackLit.hlsl: direction to use for bent visibility cone
+#define BENT_VISIBILITY_DIR_GEOM_NORMAL 0
+#define BENT_VISIBILITY_DIR_BENT_NORMAL 1
+#define BENT_VISIBILITY_DIR_SHADING_NORMAL 2
+
 // Specular occlusion fixup methods to handle noisy bent normal maps
 // (flags)
 #define BENT_VISIBILITY_FIXUP_FLAGS_NONE 0

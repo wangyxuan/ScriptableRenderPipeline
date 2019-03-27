@@ -768,6 +768,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             if (StackLitMasterNode.SpecularOcclusionModeUsesVisibilityCone(masterNode.screenSpaceSpecularOcclusionBaseMode))
             {
                 activeFields.Add("ScreenSpaceSpecularOcclusionAOConeSize." + masterNode.screenSpaceSpecularOcclusionAOConeSize.ToString());
+                activeFields.Add("ScreenSpaceSpecularOcclusionAOConeDir." + masterNode.screenSpaceSpecularOcclusionAOConeDir.ToString());
             }
 
             //if (!masterNode.specularOcclusionIsCustom.isOn) // TODO: never ON for now.
@@ -776,11 +777,15 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 if (StackLitMasterNode.SpecularOcclusionModeUsesVisibilityCone(masterNode.dataBasedSpecularOcclusionBaseMode))
                 {
                     activeFields.Add("DataBasedSpecularOcclusionAOConeSize." + masterNode.dataBasedSpecularOcclusionAOConeSize.ToString());
-                    activeFields.Add("SpecularOcclusionConeFixupMethod." + masterNode.specularOcclusionConeFixupMethod.ToString());
                 }
             }
             //else, TODO, we need one value per lobe.
 
+            // Set bent normal fixup predicate if needed:
+            if (masterNode.SpecularOcclusionUsesBentNormal())
+            {
+                activeFields.Add("SpecularOcclusionConeFixupMethod." + masterNode.specularOcclusionConeFixupMethod.ToString());
+            }
 
             //
             // Input special-casing predicates:

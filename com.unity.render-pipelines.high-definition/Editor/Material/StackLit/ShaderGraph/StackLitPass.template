@@ -170,7 +170,7 @@ Pass
     #include "Packages/com.unity.render-pipelines.high-definition/Runtime/Material/SphericalCapPivot/SpecularOcclusionDef.hlsl"
 
     // StackLit.hlsl config defines (direct, no feature keywords):
-    // _SCREENSPACE_SPECULAROCCLUSION_METHOD, _SCREENSPACE_SPECULAROCCLUSION_VISIBILITY_FROM_AO_WEIGHT
+    // _SCREENSPACE_SPECULAROCCLUSION_METHOD, _SCREENSPACE_SPECULAROCCLUSION_VISIBILITY_FROM_AO_WEIGHT, _SCREENSPACE_SPECULAROCCLUSION_VISIBILITY_DIR
     // _DATABASED_SPECULAROCCLUSION_METHOD, _DATABASED_SPECULAROCCLUSION_VISIBILITY_FROM_AO_WEIGHT
     $ScreenSpaceSpecularOcclusionBaseMode.Off:                          #define _SCREENSPACE_SPECULAROCCLUSION_METHOD SPECULAR_OCCLUSION_DISABLED
     $ScreenSpaceSpecularOcclusionBaseMode.DirectFromAO:                 #define _SCREENSPACE_SPECULAROCCLUSION_METHOD SPECULAR_OCCLUSION_FROM_AO
@@ -180,6 +180,10 @@ Pass
     $ScreenSpaceSpecularOcclusionAOConeSize.UniformAO:                  #define _SCREENSPACE_SPECULAROCCLUSION_VISIBILITY_FROM_AO_WEIGHT BENT_VISIBILITY_FROM_AO_UNIFORM
     $ScreenSpaceSpecularOcclusionAOConeSize.CosWeightedAO:              #define _SCREENSPACE_SPECULAROCCLUSION_VISIBILITY_FROM_AO_WEIGHT BENT_VISIBILITY_FROM_AO_COS
     $ScreenSpaceSpecularOcclusionAOConeSize.CosWeightedBentCorrectAO:   #define _SCREENSPACE_SPECULAROCCLUSION_VISIBILITY_FROM_AO_WEIGHT BENT_VISIBILITY_FROM_AO_COS_BENT_CORRECTION
+
+    $ScreenSpaceSpecularOcclusionAOConeDir.GeomNormal:                  #define _SCREENSPACE_SPECULAROCCLUSION_VISIBILITY_DIR BENT_VISIBILITY_DIR_GEOM_NORMAL
+    $ScreenSpaceSpecularOcclusionAOConeDir.BentNormal:                  #define _SCREENSPACE_SPECULAROCCLUSION_VISIBILITY_DIR BENT_VISIBILITY_DIR_BENT_NORMAL
+    $ScreenSpaceSpecularOcclusionAOConeDir.ShadingNormal:               #define _SCREENSPACE_SPECULAROCCLUSION_VISIBILITY_DIR BENT_VISIBILITY_DIR_SHADING_NORMAL
 
     $DataBasedSpecularOcclusionBaseMode.Off:                            #define _DATABASED_SPECULAROCCLUSION_METHOD SPECULAR_OCCLUSION_DISABLED
     $DataBasedSpecularOcclusionBaseMode.DirectFromAO:                   #define _DATABASED_SPECULAROCCLUSION_METHOD SPECULAR_OCCLUSION_FROM_AO

@@ -172,6 +172,14 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             CosWeightedBentCorrectAO
         }
 
+        // This is in case SSAO-based SO method requires it (the SSAO we have doesn't provide a direction)
+        public enum SpecularOcclusionAOConeDir
+        {
+            GeomNormal,
+            BentNormal,
+            ShadingNormal
+        }
+
         // SO Bent cone fixup is only for methods using visibility cone and only for the data based SO:
         public enum SpecularOcclusionConeFixupMethod
         {
@@ -610,7 +618,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
                 m_ScreenSpaceSpecularOcclusionBaseMode = value;
                 UpdateNodeAfterDeserialization();
-                Dirty(ModificationScope.Graph);
+                Dirty(ModificationScope.Topological);
             }
         }
 
@@ -627,7 +635,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
                 m_DataBasedSpecularOcclusionBaseMode = value;
                 UpdateNodeAfterDeserialization();
-                Dirty(ModificationScope.Graph);
+                Dirty(ModificationScope.Topological);
             }
         }
 
@@ -644,6 +652,24 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
                 m_ScreenSpaceSpecularOcclusionAOConeSize = value;
                 Dirty(ModificationScope.Graph);
+            }
+        }
+
+        // See SpecularOcclusionAOConeDir for why we need this only for SSAO-based SO:
+        [SerializeField]
+        SpecularOcclusionAOConeDir m_ScreenSpaceSpecularOcclusionAOConeDir;
+
+        public SpecularOcclusionAOConeDir screenSpaceSpecularOcclusionAOConeDir
+        {
+            get { return m_ScreenSpaceSpecularOcclusionAOConeDir; }
+            set
+            {
+                if (m_ScreenSpaceSpecularOcclusionAOConeDir == value)
+                    return;
+
+                m_ScreenSpaceSpecularOcclusionAOConeDir = value;
+                UpdateNodeAfterDeserialization();
+                Dirty(ModificationScope.Topological);
             }
         }
 
@@ -797,6 +823,13 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 || soMethod == SpecularOcclusionBaseMode.SPTDIntegrationOfBentAO);
         }
 
+        public bool SpecularOcclusionUsesBentNormal()
+        {
+            return (SpecularOcclusionModeUsesVisibilityCone(dataBasedSpecularOcclusionBaseMode)
+                    || (SpecularOcclusionModeUsesVisibilityCone(screenSpaceSpecularOcclusionBaseMode) 
+                        && screenSpaceSpecularOcclusionAOConeDir == SpecularOcclusionAOConeDir.BentNormal));
+        }
+
         public static bool SpecularOcclusionConeFixupMethodModifiesRoughness(SpecularOcclusionConeFixupMethod soConeFixupMethod)
         {
             return (soConeFixupMethod == SpecularOcclusionConeFixupMethod.BoostBSDFRoughness
@@ -858,8 +891,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             //    validSlots.Add(SpecularOcclusionSlotId);
             //}
 
-            if (SpecularOcclusionModeUsesVisibilityCone(dataBasedSpecularOcclusionBaseMode)
-                && specularOcclusionConeFixupMethod != SpecularOcclusionConeFixupMethod.Off)
+            if (SpecularOcclusionUsesBentNormal() && specularOcclusionConeFixupMethod != SpecularOcclusionConeFixupMethod.Off)
             {
                 AddSlot(new Vector1MaterialSlot(SOFixupVisibilityRatioThresholdSlotId, SOFixupVisibilityRatioThresholdSlotName, SOFixupVisibilityRatioThresholdSlotName, SlotType.Input, 0.2f, ShaderStageCapability.Fragment));
                 validSlots.Add(SOFixupVisibilityRatioThresholdSlotId);

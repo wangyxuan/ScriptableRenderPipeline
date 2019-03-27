@@ -342,6 +342,14 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline.Drawing
                         field.RegisterValueChangedCallback(ChangeScreenSpaceSpecularOcclusionAOConeSize);
                     });
                 });
+                ps.Add(new PropertyRow(CreateLabel("Specular Occlusion (SS) AO Cone Dir", indentLevel)), (row) =>
+                {
+                    row.Add(new EnumField(StackLitMasterNode.SpecularOcclusionAOConeDir.ShadingNormal), (field) =>
+                    {
+                        field.value = m_Node.screenSpaceSpecularOcclusionAOConeDir;
+                        field.RegisterValueChangedCallback(ChangeScreenSpaceSpecularOcclusionAOConeDir);
+                    });
+                });
                 --indentLevel;
             }
 
@@ -376,16 +384,20 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline.Drawing
                             field.RegisterValueChangedCallback(ChangeDataBasedSpecularOcclusionAOConeSize);
                         });
                     });
-                    ps.Add(new PropertyRow(CreateLabel("Specular Occlusion Cone Fixup", indentLevel)), (row) =>
-                    {
-                        row.Add(new EnumField(StackLitMasterNode.SpecularOcclusionConeFixupMethod.Off), (field) =>
-                        {
-                            field.value = m_Node.specularOcclusionConeFixupMethod;
-                            field.RegisterValueChangedCallback(ChangeSpecularOcclusionConeFixupMethod);
-                        });
-                    });
                     --indentLevel;
                 }
+            }
+
+            if (m_Node.SpecularOcclusionUsesBentNormal())
+            {
+                ps.Add(new PropertyRow(CreateLabel("Specular Occlusion Bent Cone Fixup", indentLevel)), (row) =>
+                {
+                    row.Add(new EnumField(StackLitMasterNode.SpecularOcclusionConeFixupMethod.Off), (field) =>
+                    {
+                        field.value = m_Node.specularOcclusionConeFixupMethod;
+                        field.RegisterValueChangedCallback(ChangeSpecularOcclusionConeFixupMethod);
+                    });
+                });
             }
 
             ps.Add(new PropertyRow(CreateLabel("Advanced Options", indentLevel)), (row) => {} );
@@ -683,6 +695,15 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline.Drawing
 
             m_Node.owner.owner.RegisterCompleteObjectUndo("ScreenSpaceSpecularOcclusionAOConeSize Change");
             m_Node.screenSpaceSpecularOcclusionAOConeSize = (StackLitMasterNode.SpecularOcclusionAOConeSize)evt.newValue;
+        }
+
+        void ChangeScreenSpaceSpecularOcclusionAOConeDir(ChangeEvent<Enum> evt)
+        {
+            if (Equals(m_Node.screenSpaceSpecularOcclusionAOConeDir, evt.newValue))
+                return;
+
+            m_Node.owner.owner.RegisterCompleteObjectUndo("ScreenSpaceSpecularOcclusionAOConeDir Change");
+            m_Node.screenSpaceSpecularOcclusionAOConeDir = (StackLitMasterNode.SpecularOcclusionAOConeDir)evt.newValue;
         }
 
         //void ChangeSpecularOcclusionIsCustom(ChangeEvent<bool> evt)

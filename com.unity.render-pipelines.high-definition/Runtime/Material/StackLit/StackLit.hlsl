@@ -301,7 +301,7 @@ int ComputeAdding_GetDualNormalsTopHandlingMethod()
 
 // Handling of ShaderGraph configured specular occlusion options:
 //
-// _SCREENSPACE_SPECULAROCCLUSION_METHOD, _SCREENSPACE_SPECULAROCCLUSION_VISIBILITY_FROM_AO_WEIGHT
+// _SCREENSPACE_SPECULAROCCLUSION_METHOD, _SCREENSPACE_SPECULAROCCLUSION_VISIBILITY_FROM_AO_WEIGHT, _SCREENSPACE_SPECULAROCCLUSION_VISIBILITY_DIR
 // _DATABASED_SPECULAROCCLUSION_METHOD, _DATABASED_SPECULAROCCLUSION_VISIBILITY_FROM_AO_WEIGHT
 
 int GetScreenSpaceSpecularOcclusionMethod()
@@ -320,6 +320,34 @@ int GetScreenSpaceSpecularOcclusionVisibilityFromAoWeight()
     method = _SCREENSPACE_SPECULAROCCLUSION_VISIBILITY_FROM_AO_WEIGHT;
 #endif
     return method;
+}
+
+// For screenspace SO, if a bent algorithm is used, the SS algorithm should also give the direction.
+// It is not the case now, so we have an option to use either the more neutral geometric normal vs
+// the baked bent normal (which is more appropriate for the data-based SO).
+float3 GetScreenSpaceSpecularOcclusionVisibilityDir(BSDFData bsdfData, float3 interfaceShadingNormal)
+{
+    int source = BENT_VISIBILITY_DIR_BENT_NORMAL;
+    float3 dir = bsdfData.bentNormalWS;
+
+#ifdef _SCREENSPACE_SPECULAROCCLUSION_VISIBILITY_DIR
+    source = _SCREENSPACE_SPECULAROCCLUSION_VISIBILITY_DIR;
+#endif
+
+    switch (source)
+    {
+        case BENT_VISIBILITY_DIR_GEOM_NORMAL:
+            dir = bsdfData.geomNormalWS;
+            break;
+        case BENT_VISIBILITY_DIR_BENT_NORMAL:
+            dir = bsdfData.bentNormalWS;
+            break;
+        case BENT_VISIBILITY_DIR_SHADING_NORMAL:
+            dir = interfaceShadingNormal;
+            break;
+    }
+
+    return dir;
 }
 
 int GetDataBasedSpecularOcclusionMethod()
@@ -1552,7 +1580,10 @@ void ComputeAdding(float _cti, float3 V, in BSDFData bsdfData, inout PreLightDat
             // around the lines where the normal flip,
             _cti = max(abs(dot(bsdfData.coatNormalWS, V)), 0.1);
             // and try not to go beyond the geometric normal:
-            // This is important to avoid outer rim boost from that large clamp of 0.1
+            // This is important to avoid outer rim boost (on the base layer energy, and dimming for the coat,
+            // as when cti -> 0 - which we prevent - , coat reflections get more energy but there's also less
+            // transmission) from that large angular range (from the grazing limit of PI/2 up to acos(0.1))
+            // due to use of a clamp with a large value of 0.1
             _cti = min(_cti, ClampNdotV(preLightData.geomNdotV));
         }
     }
@@ -2187,6 +2218,8 @@ void PreLightData_SetupOcclusion(PositionInputs posInput, BSDFData bsdfData, flo
     // For (baked) data based specular occlusion:
     int specularOcclusionAlgorithm = GetDataBasedSpecularOcclusionMethod();
     int bentVisibilityAlgorithm = GetDataBasedSpecularOcclusionVisibilityFromAoWeight();
+    float3 bentVisibilityDir;
+
     bool useHemisphereClip = true;
     uint bentFixup = GetSpecularOcclusionBentVisibilityFixupFlags();
 
@@ -2206,18 +2239,22 @@ void PreLightData_SetupOcclusion(PositionInputs posInput, BSDFData bsdfData, flo
     // There is one such pair of SO value per lobe. Screen space values will be combined with min( , ) with data-based calculated SO.
     // Unlike Lit, for screen space AO based SO, we offer the more advanced algorithms too.
 
+    // A caveat for SSAO-based SO methods that would use a bent visibility algorithm is that the SSAO algorithm doesn't calculate the
+    // required direction, so we offer the choice to use a non dynamically calculated one:
+    // (vertex interpolated, baked bent normal map, or shading normal)
+    bentVisibilityDir = GetScreenSpaceSpecularOcclusionVisibilityDir(bsdfData, N[BASE_NORMAL_IDX]);
     screenSpaceSpecularOcclusion[BASE_LOBEA_IDX] = PreLightData_GetSpecularOcclusion(screenSpaceSpecularOcclusionAlgorithm,
                                                                                      preLightData.screenSpaceAmbientOcclusion,
                                                                                      V, N[BASE_NORMAL_IDX], NdotV[BASE_NORMAL_IDX] /* clamped */,
                                                                                      preLightData.iblPerceptualRoughness[BASE_LOBEA_IDX],
-                                                                                     bsdfData.bentNormalWS, screenSpaceBentVisibilityAlgorithm,
+                                                                                     bentVisibilityDir, screenSpaceBentVisibilityAlgorithm,
                                                                                      orthoBasisViewNormal[BASE_NORMAL_IDX], useHemisphereClip);
 
     screenSpaceSpecularOcclusion[BASE_LOBEB_IDX] = PreLightData_GetSpecularOcclusion(screenSpaceSpecularOcclusionAlgorithm,
                                                                                      preLightData.screenSpaceAmbientOcclusion,
                                                                                      V, N[BASE_NORMAL_IDX], NdotV[BASE_NORMAL_IDX] /* clamped */,
                                                                                      preLightData.iblPerceptualRoughness[BASE_LOBEB_IDX],
-                                                                                     bsdfData.bentNormalWS, screenSpaceBentVisibilityAlgorithm,
+                                                                                     bentVisibilityDir, screenSpaceBentVisibilityAlgorithm,
                                                                                      orthoBasisViewNormal[BASE_NORMAL_IDX], useHemisphereClip);
 
 
@@ -2249,11 +2286,12 @@ void PreLightData_SetupOcclusion(PositionInputs posInput, BSDFData bsdfData, flo
 
     if( IsVLayeredEnabled(bsdfData) )
     {
+        bentVisibilityDir = GetScreenSpaceSpecularOcclusionVisibilityDir(bsdfData, N[COAT_NORMAL_IDX]);
         screenSpaceSpecularOcclusion[COAT_LOBE_IDX] = PreLightData_GetSpecularOcclusion(screenSpaceSpecularOcclusionAlgorithm,
                                                                                         preLightData.screenSpaceAmbientOcclusion,
                                                                                         V, N[COAT_NORMAL_IDX], NdotV[COAT_NORMAL_IDX] /* clamped */,
                                                                                         preLightData.iblPerceptualRoughness[COAT_LOBE_IDX],
-                                                                                        bsdfData.bentNormalWS, screenSpaceBentVisibilityAlgorithm,
+                                                                                        bentVisibilityDir, screenSpaceBentVisibilityAlgorithm,
                                                                                         orthoBasisViewNormal[COAT_NORMAL_IDX], useHemisphereClip);
 
         dataBasedSpecularOcclusion[COAT_LOBE_IDX] = PreLightData_GetSpecularOcclusion(specularOcclusionAlgorithm,
