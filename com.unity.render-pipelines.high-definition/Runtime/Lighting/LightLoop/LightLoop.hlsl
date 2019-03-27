@@ -95,8 +95,10 @@ void LightLoop( float3 V, PositionInputs posInput, PreLightData preLightData, BS
                     // We always evaluate shadows.
                     evaluateShadows = true;
 
-                    // Care must be taken to bias in the direction of the light.
-                    shadowBiasNormal *= FastSign(NdotL);
+                    // Care must be taken to bias in the direction of the light. Since we bias with the shadowBiasNormal
+                    // and the later might not be oriented in the same way vs L as the N used for shading, we can't
+                    // use NdotL here and we must calculate a dot product again:
+                    shadowBiasNormal *= FastSign(dot(shadowBiasNormal, -light.forward));
                 }
                 else
                 {
