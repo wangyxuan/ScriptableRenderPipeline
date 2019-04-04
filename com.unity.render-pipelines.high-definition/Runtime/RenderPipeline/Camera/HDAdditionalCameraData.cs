@@ -113,8 +113,8 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         {
             None,
             FastApproximateAntialiasing,
-            SubpixelMorphologicalAntiAliasing,
-            TemporalAntialiasing
+            TemporalAntialiasing,
+            SubpixelMorphologicalAntiAliasing
         }
 
         public enum SMAAQualityLevel
@@ -132,7 +132,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         
 
         [Tooltip("LayerMask HDRP uses for Volume interpolation for this Camera.")]
-        public LayerMask volumeLayerMask = -1;
+        public LayerMask volumeLayerMask = 1;
 
         public Transform volumeAnchorOverride;
 
