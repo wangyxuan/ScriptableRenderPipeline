@@ -13,7 +13,7 @@ namespace UnityEngine.Experimental.VoxelizedShadows
     [Serializable]
     public struct VxShadowsData
     {
-        public int InstanceId;
+        public byte[] GuidByteArray;
         public VxShadowsType Type;
         public Vector3 Position;
         public Quaternion Rotation;
