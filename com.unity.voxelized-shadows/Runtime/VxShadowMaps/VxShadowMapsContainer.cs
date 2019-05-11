@@ -37,7 +37,7 @@ namespace UnityEngine.Experimental.VoxelizedShadows
 
         public void VerifyResources()
         {
-            if (Resources != null)
+            if (enabled && Resources != null)
                 ValidateResources();
             else
                 InvalidateResources();

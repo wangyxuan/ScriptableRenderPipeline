@@ -223,7 +223,8 @@ namespace UnityEngine.Experimental.VoxelizedShadows
             for (int i = 0; i < resources.VxShadowsDataList.Length; i++)
             {
                 var vxsData = resources.VxShadowsDataList[i];
-                var vxsm = FindVxShadowMap(vxsData.Type, vxsData.InstanceId);
+                var vxsmGuid = new System.Guid(vxsData.GuidByteArray);
+                var vxsm = FindVxShadowMap(vxsData.Type, vxsmGuid);
 
                 if (vxsm != null)
                 {
@@ -266,37 +267,37 @@ namespace UnityEngine.Experimental.VoxelizedShadows
             return _vxShadowMapsBuffer != null ? (uint)_vxShadowMapsBuffer.count * 4 : 0;
         }
 
-        private DirectionalVxShadowMap FindDirVxShadowMap(int instanceId)
+        private DirectionalVxShadowMap FindDirVxShadowMap(System.Guid guid)
         {
             foreach (var vxsm in _dirVxShadowMapList)
-                if (vxsm.GetInstanceID() == instanceId)
+                if (vxsm.GuidComp.GetGuid() == guid)
                     return vxsm;
 
             return null;
         }
-        private PointVxShadowMap FindPointVxShadowMap(int instanceId)
+        private PointVxShadowMap FindPointVxShadowMap(System.Guid guid)
         {
             foreach (var vxsm in _pointVxShadowMapList)
-                if (vxsm.GetInstanceID() == instanceId)
+                if (vxsm.GuidComp.GetGuid() == guid)
                     return vxsm;
 
             return null;
         }
-        private SpotVxShadowMap FindSpotVxShadowMap(int instanceId)
+        private SpotVxShadowMap FindSpotVxShadowMap(System.Guid guid)
         {
             foreach (var vxsm in _spotVxShadowMapList)
-                if (vxsm.GetInstanceID() == instanceId)
+                if (vxsm.GuidComp.GetGuid() == guid)
                     return vxsm;
 
             return null;
         }
-        private VxShadowMap FindVxShadowMap(VxShadowsType type, int instanceId)
+        private VxShadowMap FindVxShadowMap(VxShadowsType type, System.Guid guid)
         {
             switch (type)
             {
-                case VxShadowsType.Directional: return FindDirVxShadowMap(instanceId);
-                case VxShadowsType.Point:       return FindPointVxShadowMap(instanceId);
-                case VxShadowsType.Spot:        return FindSpotVxShadowMap(instanceId);
+                case VxShadowsType.Directional: return FindDirVxShadowMap(guid);
+                case VxShadowsType.Point:       return FindPointVxShadowMap(guid);
+                case VxShadowsType.Spot:        return FindSpotVxShadowMap(guid);
             }
 
             return null;
