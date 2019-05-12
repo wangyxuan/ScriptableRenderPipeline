@@ -11,13 +11,13 @@ namespace UnityEngine.Experimental.VoxelizedShadows
         private void OnEnable()
         {
             VxShadowMapsManager.Instance.RegisterVxShadowMapsContainer(this);
-            VxShadowMapsManager.Instance.LoadResources(Resources);
+            VerifyResources();
         }
 
         private void OnDisable()
         {
             VxShadowMapsManager.Instance.UnregisterVxShadowMapsContainer(this);
-            VxShadowMapsManager.Instance.UnloadResources();
+            VerifyResources();
         }
 
         public void VerifyResources()
