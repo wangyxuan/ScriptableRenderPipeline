@@ -1,12 +1,13 @@
 using UnityEngine;
 
-public class GuidComponent : ISerializationCallbackReceiver
+[System.Serializable]
+public class GuidReference : ISerializationCallbackReceiver
 {
     [SerializeField]
     private byte[] _serializedGuid;
     private System.Guid Guid = System.Guid.Empty;
 
-    public GuidComponent()
+    public GuidReference()
     {
     }
 
