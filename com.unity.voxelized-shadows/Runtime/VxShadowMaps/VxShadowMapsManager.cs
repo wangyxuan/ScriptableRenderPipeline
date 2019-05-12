@@ -270,7 +270,7 @@ namespace UnityEngine.Experimental.VoxelizedShadows
         private DirectionalVxShadowMap FindDirVxShadowMap(System.Guid guid)
         {
             foreach (var vxsm in _dirVxShadowMapList)
-                if (vxsm.GuidComp.GetGuid() == guid)
+                if (vxsm.GuidRef.GetGuid() == guid)
                     return vxsm;
 
             return null;
@@ -278,7 +278,7 @@ namespace UnityEngine.Experimental.VoxelizedShadows
         private PointVxShadowMap FindPointVxShadowMap(System.Guid guid)
         {
             foreach (var vxsm in _pointVxShadowMapList)
-                if (vxsm.GuidComp.GetGuid() == guid)
+                if (vxsm.GuidRef.GetGuid() == guid)
                     return vxsm;
 
             return null;
@@ -286,7 +286,7 @@ namespace UnityEngine.Experimental.VoxelizedShadows
         private SpotVxShadowMap FindSpotVxShadowMap(System.Guid guid)
         {
             foreach (var vxsm in _spotVxShadowMapList)
-                if (vxsm.GuidComp.GetGuid() == guid)
+                if (vxsm.GuidRef.GetGuid() == guid)
                     return vxsm;
 
             return null;

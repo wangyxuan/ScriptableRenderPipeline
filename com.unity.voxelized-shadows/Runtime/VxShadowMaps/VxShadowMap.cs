@@ -30,7 +30,7 @@ namespace UnityEngine.Experimental.VoxelizedShadows
 
     public abstract class VxShadowMap : MonoBehaviour
     {
-        public GuidComponent GuidComp = new GuidComponent();
+        public GuidReference GuidRef;
 
         public static VoxelResolution MaxSubtreeResolution => VoxelResolution._4096;
         public static int MaxSubtreeResolutionInt => (int)MaxSubtreeResolution;
