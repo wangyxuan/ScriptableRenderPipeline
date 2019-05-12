@@ -7,40 +7,25 @@ namespace UnityEngine.Experimental.VoxelizedShadows
     public class VxShadowMapsContainer : MonoBehaviour
     {
         public VxShadowMapsResources Resources = null;
-        public float Size = 0;
 
         private void OnEnable()
         {
             VxShadowMapsManager.Instance.RegisterVxShadowMapsContainer(this);
+            VxShadowMapsManager.Instance.LoadResources(Resources);
         }
 
         private void OnDisable()
         {
             VxShadowMapsManager.Instance.UnregisterVxShadowMapsContainer(this);
-        }
-
-        private void OnValidate()
-        {
-            VerifyResources();
-        }
-
-        private void ValidateResources()
-        {
-            VxShadowMapsManager.Instance.LoadResources(Resources);
-            Size = (float)VxShadowMapsManager.Instance.GetSizeInBytes() / (1024.0f * 1024.0f);
-        }
-        private void InvalidateResources()
-        {
             VxShadowMapsManager.Instance.UnloadResources();
-            Size = 0.0f;
         }
 
         public void VerifyResources()
         {
             if (enabled && Resources != null)
-                ValidateResources();
+                VxShadowMapsManager.Instance.LoadResources(Resources);
             else
-                InvalidateResources();
+                VxShadowMapsManager.Instance.UnloadResources();
         }
     }
 }
