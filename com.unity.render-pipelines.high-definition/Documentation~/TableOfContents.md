@@ -35,16 +35,17 @@
   * [HDRP Asset](HDRP-Asset)
   * [Frame Settings](Frame-Settings)
 * Materials
-  * [Surface Type](Surface-Type)
-  * [Double Sided](Double-Sided)
-  * [Ambient Occlusion](Ambient-Occlusion)
   * [Alpha Clipping](Alpha-Clipping)
+  * [Ambient Occlusion](Ambient-Occlusion)
+  * [Displacement Mode](Displacement-Mode)
+  * [Double Sided](Double-Sided)
+  * [Geometric Specular Anti-aliasing](Geometric-Specular-Anti-Aliasing)
   * [Material Type](Material-Type)
   * [Renderer and Material Priority](Renderer-And-Material-Priority)
+  * [Surface Type](Surface-Type)
   * Subsurface Scattering
     - [Subsurface Scattering Materials](Subsurface-Scattering)
     - [Diffusion Profile](Diffusion-Profile)
-
   * [Decal Projector](Decal-Projector)
   * Shader List
     * [Lit Shader](Lit-Shader)
