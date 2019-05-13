@@ -41,5 +41,6 @@
             "m_Guid": ""
         }
     },
-    "m_Path": "Shader Graphs"
+    "m_Path": "Shader Graph Tests/Utility",
+    "m_ActiveOutputNodeGuidSerialized": "766b38a1-03da-4835-b603-88eb4c0ee0f5"
 }
