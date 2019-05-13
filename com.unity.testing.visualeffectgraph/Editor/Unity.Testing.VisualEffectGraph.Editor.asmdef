@@ -1,8 +1,7 @@
 {
     "name": "Unity.Testing.VisualEffectGraph.Editor",
     "references": [
-        "Unity.Testing.VisualEffectGraph",
-		"Unity.VisualEffectGraph.Editor"
+        "Unity.Testing.VisualEffectGraph"
     ],
     "includePlatforms": [
         "Editor"
