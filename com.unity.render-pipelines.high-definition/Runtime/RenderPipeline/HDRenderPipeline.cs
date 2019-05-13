@@ -2784,7 +2784,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
             if (visualEnv.fogType.value != FogType.None)
             {
-                var pixelCoordToViewDirWS = hdCamera.mainViewConstants.pixelCoordToViewDirWS;
+                var pixelCoordToViewDirWS = hdCamera.mainViewConstants.skyPixelCoordToViewDirWS;
                 m_SkyManager.RenderOpaqueAtmosphericScattering(cmd, hdCamera, colorBuffer, depthBuffer, pixelCoordToViewDirWS, hdCamera.frameSettings.IsEnabled(FrameSettingsField.MSAA));
             }
         }

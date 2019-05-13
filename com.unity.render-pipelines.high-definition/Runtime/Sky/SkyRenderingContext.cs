@@ -310,7 +310,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
                 {
                     m_BuiltinParameters.commandBuffer = cmd;
                     m_BuiltinParameters.sunLight = sunLight;
-                    m_BuiltinParameters.pixelCoordToViewDirMatrix = hdCamera.mainViewConstants.pixelCoordToViewDirWS;
+                    m_BuiltinParameters.pixelCoordToViewDirMatrix = hdCamera.mainViewConstants.skyPixelCoordToViewDirWS;
                     m_BuiltinParameters.screenSize = hdCamera.screenSize;
                     m_BuiltinParameters.colorBuffer = colorBuffer;
                     m_BuiltinParameters.depthBuffer = depthBuffer;
