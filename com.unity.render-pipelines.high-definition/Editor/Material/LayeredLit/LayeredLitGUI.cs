@@ -9,6 +9,13 @@ using static UnityEngine.Experimental.Rendering.HDPipeline.HDMaterialProperties;
 
 namespace UnityEditor.Experimental.Rendering.HDPipeline
 {
+    // Needed for json serialization to work
+    [Serializable]
+    internal struct SerializeableGUIDs
+    {
+        public string[] GUIDArray;
+    }
+
     /// <summary>
     /// GUI for HDRP Layered Lit materials (and tesselation), does not include shader graph + function to setup material keywords for Lit
     /// </summary>

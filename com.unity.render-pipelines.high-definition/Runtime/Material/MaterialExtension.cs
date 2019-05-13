@@ -10,7 +10,7 @@ using static UnityEngine.Experimental.Rendering.HDPipeline.HDMaterialProperties;
 
 namespace UnityEditor.Experimental.Rendering.HDPipeline
 {
-    // Arf, there is another SurfaceType in ShaderGraph (AlphaMode.cs) which conflicts in HDRP shader graph files
+    // Note: There is another SurfaceType in ShaderGraph (AlphaMode.cs) which conflicts in HDRP shader graph files
     public enum SurfaceType
     {
         Opaque,
@@ -116,12 +116,12 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
         public static MaterialId    GetMaterialId(this Material material)
         {
-            return (MaterialId)material.GetFloat(kMaterialID);
+            return material.HasProperty(kMaterialID) ? (MaterialId)material.GetFloat(kMaterialID) : MaterialId.LitStandard;
         }
 
         public static BlendMode     GetBlendMode(this Material material)
         {
-            return (BlendMode)material.GetFloat(kBlendMode);
+            return material.HasProperty(kBlendMode) ? (BlendMode)material.GetFloat(kBlendMode) : BlendMode.Additive;
         }
 
         public static int           GetLayerCount(this Material material)

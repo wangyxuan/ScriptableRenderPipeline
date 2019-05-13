@@ -10,14 +10,8 @@ using static UnityEngine.Experimental.Rendering.HDPipeline.HDMaterialProperties;
 
 namespace UnityEditor.Experimental.Rendering.HDPipeline
 {
-    // Needed for json serialization to work
-    [Serializable]
-    internal struct SerializeableGUIDs
-    {
-        public string[] GUIDArray;
-    }
-
-    public static class MaterialExtensionEditor
+    // Extension class to setup material keywords on unlit materials
+    public static class BaseUnlitGUI
     {
         public static void SetupBaseUnlitKeywords(this Material material)
         {
