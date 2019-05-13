@@ -7,7 +7,7 @@ Shader "Hidden/Lightweight Render Pipeline/Terrain/Lit (Add Pass)"
         [HideInInspector] [PerRendererData] _NumLayersCount ("Total Layer Count", Float) = 1.0
             
         // set by terrain engine
-        [HideInInspector] _Control("Control (RGBA)", 2D) = "red" {}
+        [HideInInspector] _Control("Control (RGBA)", 2D) = "red" {}  
         [HideInInspector] _Splat3("Layer 3 (A)", 2D) = "white" {}
         [HideInInspector] _Splat2("Layer 2 (B)", 2D) = "white" {}
         [HideInInspector] _Splat1("Layer 1 (G)", 2D) = "white" {}
