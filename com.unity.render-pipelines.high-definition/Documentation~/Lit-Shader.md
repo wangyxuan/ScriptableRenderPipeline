@@ -2,6 +2,8 @@
 
 The Lit Shader lets you easily create realistic materials in the High Definition Render Pipeline (HDRP). It includes options for effects like subsurface scattering, iridescence, vertex or pixel displacement, and decal compatibility. For more information about Materials, Shaders, and Textures, see the [Unity User Manual](https://docs.unity3d.com/Manual/Shaders.html).
 
+![](Images/HDRPFeatures-LitShader.png)
+
 ## Creating a Lit Material
 
 To create a new Lit Material, navigate to your Project's Asset window, right-click in the window and select **Create > Material**. This adds a new Material to your Unity Project’s Asset folder. When you create new Materials in HDRP, they use the Lit Shader by default.

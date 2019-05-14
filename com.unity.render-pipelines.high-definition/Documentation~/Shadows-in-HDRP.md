@@ -2,6 +2,8 @@
 
 The High Definition Render Pipeline’s [Lights](Light-Component.html) can cast shadows from one GameObject onto another. They emphasize the position and scale of GameObjects, which adds a degree of depth and realism to a Scene that could otherwise look flat.
 
+![](Images/HDRPFeatures-Shadows.png)
+
 ## Shadow map resolution
 
 The resolution of a Light’s shadow map determines the size of its shadow maps. The larger the shadow map, the more precise the shadows can be, and the better the High Definition Render Pipeline (HDRP) can capture small details in the shadow casting geometry. Rendering shadow maps at higher resolutions make them look sharper.
