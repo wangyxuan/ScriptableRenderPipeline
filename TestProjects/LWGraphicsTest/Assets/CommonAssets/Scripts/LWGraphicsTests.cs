@@ -28,9 +28,14 @@ public class LWGraphicsTests
         var settings = Object.FindObjectOfType<LWGraphicsTestSettings>();
         Assert.IsNotNull(settings, "Invalid test scene, could not find an object with a LWGraphicsTestSettings component");
         
+        Debug.Log("image settings " + settings.ImageComparisonSettings.TargetWidth);
+
         Scene scene = SceneManager.GetActiveScene();
 
-        if (scene.name.Substring(3, 4).Equals("_xr_"))
+        for (int i = 0; i < settings.WaitFrames; i++)
+            yield return null;
+
+        if (scene.name.Substring(3, 4).CompareTo("_xr_") == 0)
         {
             Assume.That((Application.platform != RuntimePlatform.OSXEditor && Application.platform != RuntimePlatform.OSXPlayer), "Stereo LWRP tests do not run on MacOSX.");
             
@@ -47,10 +52,6 @@ public class LWGraphicsTests
                 camera.stereoTargetEye = StereoTargetEyeMask.Both;
         }
         
-        for (int i = 0; i < settings.WaitFrames; i++)
-            yield return null;
-
-        ImageAssert.AreEqual(testCase.ReferenceImage, cameras.Where(x => x != null), settings.ImageComparisonSettings);
         if (!(settings is SGLWGraphicsTestSettings))
         {
             // Standard LWRP Test
