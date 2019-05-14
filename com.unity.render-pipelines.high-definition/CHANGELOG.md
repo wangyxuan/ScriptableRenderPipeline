@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [7.0.0-preview] - 2019-XX-XX
 
+### Changed
+- Improve decal normal blend mode when apply on a material (It increase a bit the cost of decal normal blending)
+
 ## [6.7.0-preview] - 2019-05-16
 
 ### Added
