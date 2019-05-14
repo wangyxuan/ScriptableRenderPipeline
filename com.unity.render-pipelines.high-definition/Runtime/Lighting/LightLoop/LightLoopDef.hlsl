@@ -365,13 +365,10 @@ uint PackVxShadowData(float shadowing)
 // We perform a single featch a the beginning of the lightloop
 void InitContactShadow(PositionInputs posInput, inout LightLoopContext context)
 {
-    // For now we only support one contact shadow
-    // Contactshadow is store in Red Channel of _DeferredShadowTexture
     // Note: When we ImageLoad outside of texture size, the value returned by Load is 0 (Note: On Metal maybe it clamp to value of texture which is also fine)
     // We use this property to have a neutral value for contact shadows that doesn't consume a sampler and work also with compute shader (i.e use ImageLoad)
     // We store inverse contact shadow so neutral is white. So either we sample inside or outside the texture it return 1 in case of neutral
-    //uint packedContactShadow = LOAD_TEXTURE2D_X(_DeferredShadowTexture, posInput.positionSS).x; //seongdae;vxsm;origin
-    uint packedContactShadow = LOAD_TEXTURE2D_X(_DeferredContactShadowTexture, posInput.positionSS).x; //seongdae;vxsm;
+    uint packedContactShadow = LOAD_TEXTURE2D_X(_ContactShadowTexture, posInput.positionSS).x;
     UnpackContactShadowData(packedContactShadow, context.contactShadowFade, context.contactShadow);
 }
 
@@ -384,7 +381,7 @@ float GetContactShadow(LightLoopContext lightLoopContext, int contactShadowMask)
 //seongdae;vxsm
 void InitVxShadow(PositionInputs posInput, inout LightLoopContext context)
 {
-    uint vxShadowData = LOAD_TEXTURE2D_X(_DeferredVxShadowTexture, posInput.positionSS).x;
+    uint vxShadowData = LOAD_TEXTURE2D_X(_VxShadowTexture, posInput.positionSS).x;
     float vxShadowing;
 
     UnpackVxShadowData(vxShadowData, vxShadowing);
@@ -396,3 +393,8 @@ float GetVxShadow(LightLoopContext lightLoopContext)
     return lightLoopContext.vxShadowValue;
 }
 //seongdae;vxsm
+
+float GetScreenSpaceShadow(PositionInputs posInput)
+{
+    return LOAD_TEXTURE2D_X(_ScreenSpaceShadowsTexture, posInput.positionSS).x;
+}
