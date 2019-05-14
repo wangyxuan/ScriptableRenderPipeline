@@ -1,0 +1,76 @@
+using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.LWRP;
+
+/// <summary>
+/// A <c>ScriptableRendererFeature</c> can be added to a renderer and it's responsible for injecting render passes into it.
+/// It contains data and resources required for the render passes it injects.
+/// </summary>
+public class #SCRIPTNAME# : ScriptableRendererFeature
+{
+    /// <summary>
+    /// Render pass containing all rendering logic.
+    /// </summary>
+    class CustomRenderPass : ScriptableRenderPass
+    {
+        /// <summary>
+        /// This method is called before executing the render pass. 
+        /// It can be used to configure render targets and their clear state. Also to create temporary render target textures.
+        /// When empty this render pass will render to the active camera render target.
+        /// You should never call CommandBuffer.SetRenderTarget. Instead call <c>ConfigureTarget</c> and <c>ConfigureClear</c>.
+        /// The render pipeline will ensure target setup and clearing happens in an performance manner.
+        /// </summary>
+        /// <param name="cmd">CommandBuffer to enqueue rendering commands. This will be executed by the pipeline.</param>
+        /// <param name="cameraTextureDescriptor">Render texture descriptor of the camera render target.</param>
+        public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
+        {
+
+        }
+
+        /// <summary>
+        /// Execute the pass. This is where custom rendering occurs.
+        /// </summary>
+        /// <param name="context">Use this render context to issue any draw commands during execution</param>
+        /// <param name="renderingData">Current rendering state information</param>
+        public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
+        {
+            // Here you can use the ScriptableRenderContext to issue drawing commands or execute command buffers
+            // https://docs.unity3d.com/ScriptReference/Rendering.ScriptableRenderContext.html
+            // You don't have to call ScriptableRenderContext.submit, the render pipeline will call it at specific points in the pipeline.
+        
+        }
+
+        /// <summary>
+        /// Cleanup any allocated data that was created during the execution of the pass.
+        /// </summary>
+        /// <param name="cmd">Use this <c>CommandBuffer</c> to cleanup any generated data</param>
+        public override void FrameCleanup(CommandBuffer cmd)
+        {
+        }
+    }
+
+    CustomRenderPass m_ScriptablePass;
+
+    /// <summary>
+    /// Called when the feature is added to the ScriptableRendererData
+    /// </summary>
+    public override void Create()
+    {
+        m_ScriptablePass = new CustomRenderPass();
+
+        // Configures where the render pass should be injected.
+        m_ScriptablePass.renderPassEvent = RenderPassEvent.AfterRenderingOpaques;
+    }
+    
+    /// <summary>
+    /// Injects one or multiple <c>ScriptableRenderPass</c> in the renderer.
+    /// </summary>
+    /// <param name="renderPasses">List of render passes to add to.</param>
+    /// <param name="renderingData">Rendering state. Use this to setup render passes.</param>
+    public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
+    {
+        renderer.EnqueuePass(m_ScriptablePass);
+    }
+}
+
+

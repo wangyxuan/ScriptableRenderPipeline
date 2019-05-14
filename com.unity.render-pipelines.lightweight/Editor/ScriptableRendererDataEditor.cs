@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Rendering.LWRP;
@@ -190,22 +191,34 @@ namespace UnityEditor.Rendering.LWRP
         {
             var menu = new GenericMenu();
 
-            foreach (Type type in
-                AppDomain.CurrentDomain.GetAssemblies().SelectMany(s => s.GetTypes())
-                    .Where(myType => myType.IsClass &&
-                                     !myType.IsAbstract &&
-                                     myType.IsSubclassOf(typeof(ScriptableRendererFeature))))
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (Assembly assembly in assemblies)
             {
-                var path = type.Name;
-                if (type.Namespace != null)
+                Type[] types;
+                try
                 {
-                    if (type.Namespace.Contains("Experimental"))
-                        path += " (Experimental)";
+                    types = assembly.GetTypes();
                 }
+                catch (ReflectionTypeLoadException e)
+                {
+                    types = e.Types;
+                }
+                foreach (Type type in types.Where(t => t != null))
+                {
+                    if (type.IsSubclassOf(typeof(ScriptableRendererFeature)))
+                    {
+                        var path = type.Name;
+                        if (type.Namespace != null)
+                        {
+                            if (type.Namespace.Contains("Experimental"))
+                                path += " (Experimental)";
+                        }
 
-                path = Regex.Replace(Regex.Replace(path, "([a-z])([A-Z])", "$1 $2"),
-                    "([A-Z])([A-Z][a-z])", "$1 $2");
-                menu.AddItem(new GUIContent(path), false, AddPassHandler, type.Name);
+                        path = Regex.Replace(Regex.Replace(path, "([a-z])([A-Z])", "$1 $2"),
+                            "([A-Z])([A-Z][a-z])", "$1 $2");
+                        menu.AddItem(new GUIContent(path), false, AddPassHandler, type.Name);
+                    }
+                }
             }
             menu.ShowAsContext();
         }

@@ -72,6 +72,13 @@ namespace UnityEngine.Rendering.LWRP
             isBlitRenderPass = false;
         }
 
+        /// <summary>
+        /// Configures render targets for this render pass. Call this instead of CommandBuffer.SetRenderTarget.
+        /// This method should be called inside Configure.
+        /// </summary>
+        /// <param name="colorAttachment">Color attachment identifier.</param>
+        /// <param name="depthAttachment">Depth attachment identifier.</param>
+        /// <seealso cref="Configure"/>
         public void ConfigureTarget(RenderTargetIdentifier colorAttachment, RenderTargetIdentifier depthAttachment)
         {
             overrideCameraTarget = true;
@@ -79,6 +86,12 @@ namespace UnityEngine.Rendering.LWRP
             m_DepthAttachment = depthAttachment;
         }
 
+        /// <summary>
+        /// Configures render targets for this render pass. Call this instead of CommandBuffer.SetRenderTarget.
+        /// This method should be called inside Configure.
+        /// </summary>
+        /// <param name="colorAttachment">Color attachment identifier.</param>
+        /// <seealso cref="Configure"/>
         public void ConfigureTarget(RenderTargetIdentifier colorAttachment)
         {
             overrideCameraTarget = true;
@@ -86,12 +99,29 @@ namespace UnityEngine.Rendering.LWRP
             m_DepthAttachment = BuiltinRenderTextureType.CameraTarget;
         }
 
+        /// <summary>
+        /// Configures clearing for this render pass render targets. This should be called inside Configure.
+        /// </summary>
+        /// <param name="clearFlag">ClearFlag containing information about what targets to clear.</param>
+        /// <param name="clearColor">Clear color.</param>
+        /// <seealso cref="Configure"/>
         public void ConfigureClear(ClearFlag clearFlag, Color clearColor)
         {
             m_ClearFlag = clearFlag;
             m_ClearColor = clearColor;
         }
 
+        /// <summary>
+        /// This method is called before executing the render pass. 
+        /// It can be used to configure render targets and their clear state. Also to create temporary render target textures.
+        /// When empty this render pass will render to the active camera render target.
+        /// You should never call CommandBuffer.SetRenderTarget. Instead call ConfigureTarget and ConfigureClear.
+        /// The render pipeline will ensure target setup and clearing happens in an performance manner.
+        /// </summary>
+        /// <param name="cmd">CommandBuffer to enqueue rendering commands. This will be executed by the pipeline.</param>
+        /// <param name="cameraTextureDescriptor">Render texture descriptor of the camera render target.</param>
+        /// <seealso cref="ConfigureTarget"/>
+        /// <seealso cref="ConfigureClear"/>
         public virtual void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
         {}
 
