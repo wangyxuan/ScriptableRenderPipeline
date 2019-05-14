@@ -114,14 +114,13 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             }
 
             // If using multi-select, apply toggled material to all materials.
-            bool enabled = ((Material)materialEditor.target).GetShaderPassEnabled(HDShaderPassNames.s_MotionVectorsStr);
+            bool enabled = materials[0].GetShaderPassEnabled(HDShaderPassNames.s_MotionVectorsStr);
             EditorGUI.BeginChangeCheck();
             enabled = EditorGUILayout.Toggle("Motion Vector For Vertex Animation", enabled);
             if (EditorGUI.EndChangeCheck())
             {
-                foreach (var obj in materialEditor.targets)
+                foreach (var material in materials)
                 {
-                    var material = (Material)obj;
                     material.SetShaderPassEnabled(HDShaderPassNames.s_MotionVectorsStr, enabled);
                 }
             }

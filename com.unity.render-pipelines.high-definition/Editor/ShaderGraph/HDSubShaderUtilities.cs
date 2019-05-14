@@ -1000,7 +1000,6 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
         {
             // All these properties values will be patched with the material keyword update
             collector.AddIntProperty("_StencilRef", 0); // StencilLightingUsage.NoLighting
-            collector.AddIntProperty("_StencilRef", 0); // StencilLightingUsage.NoLighting
             collector.AddIntProperty("_StencilWriteMask", 3); // StencilMask.Lighting
             // Depth prepass
             collector.AddIntProperty("_StencilRefDepth", 0); // Nothing
@@ -1011,6 +1010,9 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             // Distortion vector pass
             collector.AddIntProperty("_StencilRefDistortionVec", 64); // StencilBitMask.DistortionVectors
             collector.AddIntProperty("_StencilWriteMaskDistortionVec", 64); // StencilBitMask.DistortionVectors
+            // Gbuffer
+            collector.AddIntProperty("_StencilWriteMaskGBuffer", 3); // StencilMask.Lighting
+            collector.AddIntProperty("_StencilRefGBuffer", 2); // StencilLightingUsage.RegularLighting
         }
 
         public static void AddBlendingStatesShaderProperties(PropertyCollector collector, SurfaceType surface, BlendMode blend, int sortingPriority)

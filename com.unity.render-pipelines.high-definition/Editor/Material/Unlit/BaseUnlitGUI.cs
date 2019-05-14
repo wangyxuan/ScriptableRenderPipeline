@@ -298,14 +298,18 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 material.SetShaderPassEnabled(HDShaderPassNames.s_TransparentBackfaceStr, backFaceEnable);
             }
 
-            if (material.HasProperty(kEnableMotionVectorForVertexAnimation))
+            // Shader graphs materials have their own management of motion vector pass in the material inspector
+            if (!material.shader.IsShaderGraph())
             {
-                material.SetShaderPassEnabled(HDShaderPassNames.s_MotionVectorsStr, material.GetFloat(kEnableMotionVectorForVertexAnimation) > 0.0f);
-            }
-            else
-            {
-                // In case we have an HDRP material that inherits from this UI but does not have an _EnableMotionVectorForVertexAnimation property, we need to set it to false (default behavior)
-                material.SetShaderPassEnabled(HDShaderPassNames.s_MotionVectorsStr, false);
+                if (material.HasProperty(kEnableMotionVectorForVertexAnimation))
+                {
+                    material.SetShaderPassEnabled(HDShaderPassNames.s_MotionVectorsStr, material.GetFloat(kEnableMotionVectorForVertexAnimation) > 0.0f);
+                }
+                else
+                {
+                    // In case we have an HDRP material that inherits from this UI but does not have an _EnableMotionVectorForVertexAnimation property, we need to set it to false (default behavior)
+                    material.SetShaderPassEnabled(HDShaderPassNames.s_MotionVectorsStr, false);
+                }
             }
         }
     }

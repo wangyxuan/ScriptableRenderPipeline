@@ -10,7 +10,6 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.Experimental.Rendering.HDPipeline;
 using UnityEditor.ShaderGraph.Drawing.Inspector;
-using UnityEditor.ShaderGraph.Drawing;
 
 namespace UnityEditor.Experimental.Rendering.HDPipeline
 {

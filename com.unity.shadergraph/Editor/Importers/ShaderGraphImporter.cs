@@ -102,6 +102,20 @@ Shader ""Hidden/GraphErrorShader2""
             }
         }
 
+        public static AbstractMaterialNode GetOutputNode(string path)
+        {
+            try
+            {
+                var textGraph = File.ReadAllText(path, Encoding.UTF8);
+                var graph = JsonUtility.FromJson<GraphData>(textGraph);
+                return (AbstractMaterialNode)graph.GetNodes<IMasterNode>().FirstOrDefault() ?? graph.GetNodes<SubGraphOutputNode>().FirstOrDefault();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         static string GetShaderText(string path, out List<PropertyCollector.TextureInfo> configuredTextures, List<string> sourceAssetDependencyPaths, out GraphData graph)
         {
             graph = null;

@@ -31,9 +31,16 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             using (var changed = new EditorGUI.ChangeCheckScope())
             {
                 uiBlocks.OnGUI(materialEditor, props);
+
+                if (changed.changed)
+                {
+                    foreach (var material in uiBlocks.materials)
+                        SetupMaterialKeywordsAndPassInternal(material);
+                }
             }
         }
 
-        protected override void SetupMaterialKeywordsAndPassInternal(Material material) => DecalUI.SetupMaterialKeywordsAndPass(material);
+        // We don't have any keyword/pass to setup currently for decal shader graphs
+        protected override void SetupMaterialKeywordsAndPassInternal(Material material) {}
     }
 }

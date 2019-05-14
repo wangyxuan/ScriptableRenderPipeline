@@ -6,9 +6,24 @@ using UnityEditorInternal;
 using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering.HDPipeline;
+using UnityEditor.ShaderGraph;
 
 namespace UnityEditor.Experimental.Rendering.HDPipeline
 {
+    public static class Test
+    {
+        internal static bool IsShaderGraph(this Shader shader)
+        {
+            AssetImporter shaderImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(shader));
+            return shaderImporter is ShaderGraphImporter;
+        }
+
+        internal static AbstractMaterialNode GetShaderGraphOutputNode(this Shader shader)
+        {
+            return ShaderGraphImporter.GetOutputNode(AssetDatabase.GetAssetPath(shader));
+        }
+    }
+
     public class HDEditorUtils
     {
         static readonly Action<SerializedProperty, GUIContent> k_DefaultDrawer = (p, l) => EditorGUILayout.PropertyField(p, l);
@@ -25,6 +40,16 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
             { "HDRP/TerrainLit", TerrainLitGUI.SetupMaterialKeywordsAndPass }
         };
 
+        static Dictionary<Type, MaterialResetter> k_ShaderGraphMaterialResetters = new Dictionary<Type, MaterialResetter>
+        {
+            { typeof(HDUnlitMasterNode), UnlitGUI.SetupUnlitMaterialKeywordsAndPass },
+            { typeof(HDLitMasterNode), LitGUI.SetupMaterialKeywordsAndPass },
+            // Currently we don't have different keyword setup functions for hair, fabric and stacklit so we use the lit setup function
+            { typeof(FabricMasterNode), LitGUI.SetupMaterialKeywordsAndPass },
+            { typeof(HairMasterNode), LitGUI.SetupMaterialKeywordsAndPass },
+            { typeof(StackLitMasterNode), LitGUI.SetupMaterialKeywordsAndPass },
+        };
+
         public static T LoadAsset<T>(string relativePath) where T : UnityEngine.Object
         {
             return AssetDatabase.LoadAssetAtPath<T>(HDUtils.GetHDRenderPipelinePath() + relativePath);
@@ -32,8 +57,23 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
 
         public static bool ResetMaterialKeywords(Material material)
         {
-            MaterialResetter resetter;
-            if (k_MaterialResetters.TryGetValue(material.shader.name, out resetter))
+            MaterialResetter resetter = null;
+
+            // For shader graphs, we retrieve the master node type to get the materials resetter
+            if (material.shader.IsShaderGraph())
+            {
+                var masterNodeType = material.shader.GetShaderGraphOutputNode()?.GetType();
+                if (masterNodeType != null)
+                {
+                    k_ShaderGraphMaterialResetters.TryGetValue(masterNodeType, out resetter);
+                }
+            }
+            else
+            {
+                k_MaterialResetters.TryGetValue(material.shader.name, out resetter);
+            }
+
+            if (resetter != null)
             {
                 CoreEditorUtils.RemoveMaterialKeywords(material);
                 // We need to reapply ToggleOff/Toggle keyword after reset via ApplyMaterialPropertyDrawers
@@ -42,6 +82,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 EditorUtility.SetDirty(material);
                 return true;
             }
+
             return false;
         }
 
