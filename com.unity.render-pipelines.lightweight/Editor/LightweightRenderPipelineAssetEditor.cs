@@ -20,7 +20,7 @@ namespace UnityEditor.Rendering.LWRP
             public static GUIContent lightingSettingsText = EditorGUIUtility.TrTextContent("Lighting");
             public static GUIContent shadowSettingsText = EditorGUIUtility.TrTextContent("Shadows");
             public static GUIContent advancedSettingsText = EditorGUIUtility.TrTextContent("Advanced");
-            public static GUIContent rendererSettingsText = EditorGUIUtility.TrTextContent("Renderer Specific");
+            public static GUIContent rendererSettingsText = EditorGUIUtility.TrTextContent("Renderer Data");
 
             // General
             public static GUIContent requireDepthTextureText = EditorGUIUtility.TrTextContent("Depth Texture", "If enabled the pipeline will generate camera's depth that can be bound in shaders as _CameraDepthTexture.");
@@ -130,7 +130,7 @@ namespace UnityEditor.Rendering.LWRP
             // TODO: Only show renderer data editor when the renderer data asset is a sub-asset of the pipeline asset.
             if (m_RendererDataEditor != null)
             {
-                EditorGUILayout.BeginFoldoutHeaderGroup(true, "Renderer Data");
+                EditorGUILayout.BeginFoldoutHeaderGroup(true, Styles.rendererSettingsText);
                 m_RendererDataEditor.OnInspectorGUI();
                 EditorGUILayout.EndFoldoutHeaderGroup();
             }
