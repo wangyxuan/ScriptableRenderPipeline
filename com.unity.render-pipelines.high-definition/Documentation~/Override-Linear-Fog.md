@@ -15,7 +15,6 @@ After you add a **Linear Fog** override, you must set the Volume to use **Linear
 
 ![](Images/Override-LinearFog1.png)
 
-| **Property**          | **Description**                                              |
 | --------------------- | ------------------------------------------------------------ |
 | **Density**           | Use the slider to set the maximum density of the fog. This acts as a global multiplier. Higher values produce thicker fog. |
 | **Fog Start**         | The distance from the Camera at which the fog density begins to increase from 0. |
