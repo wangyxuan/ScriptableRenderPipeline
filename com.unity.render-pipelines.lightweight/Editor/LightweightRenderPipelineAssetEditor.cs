@@ -201,6 +201,9 @@ namespace UnityEditor.Rendering.LWRP
             {
                 if (m_RendererTypeProp.intValue != (int)RendererType.Custom)
                 {
+                    // LoadBuiltinRendererData() below requires the up-to-date version of the asset.
+                    serializedObject.ApplyModifiedProperties();
+
                     m_RendererDataProp.objectReferenceValue = LightweightRenderPipeline.asset.LoadBuiltinRendererData();
                     m_RecreateRendererDataEditor = true;
                 }

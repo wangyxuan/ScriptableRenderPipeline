@@ -2,6 +2,7 @@
 using System;
 using UnityEditor;
 using UnityEditor.ProjectWindowCallback;
+using UnityEngine.Experimental.Rendering.LWRP;
 #endif
 
 namespace UnityEngine.Rendering.LWRP
@@ -72,6 +73,7 @@ namespace UnityEngine.Rendering.LWRP
     {
         Custom,
         ForwardRenderer,
+        Renderer2D
     }
 
     public class LightweightRenderPipelineAsset : RenderPipelineAsset, ISerializationCallbackReceiver
@@ -209,17 +211,43 @@ namespace UnityEngine.Rendering.LWRP
 
         public ScriptableRendererData LoadBuiltinRendererData()
         {
+#if UNITY_EDITOR
             switch (m_RendererType)
             {
+                case RendererType.Renderer2D:
+                    {
+                        var pipelineAssetPath = AssetDatabase.GetAssetPath(this);
+                        var allSubAssets = AssetDatabase.LoadAllAssetsAtPath(pipelineAssetPath);
+                        bool foundExisting = false;
+                        foreach (var subAsset in allSubAssets)
+                        {
+                            if (subAsset is Renderer2DData)
+                            {
+                                m_RendererData = subAsset as Renderer2DData;
+                                foundExisting = true;
+                                break;
+                            }
+                        }
+
+                        if (!foundExisting)
+                        {
+                            var renderer2DData = CreateInstance<Renderer2DData>();
+                            renderer2DData.OnCreate();
+                            renderer2DData.name = "2D Renderer Data";
+                            AssetDatabase.AddObjectToAsset(renderer2DData, this);
+                            m_RendererData = renderer2DData;
+                        }
+                    }
+                    break;
+
                 // Forward Renderer is the fallback renderer that works on all platforms
                 default:
-#if UNITY_EDITOR
                     m_RendererData = LoadResourceFile<ForwardRendererData>();
-#else
-                    m_RendererData = null;
-#endif
                     break;
             }
+#else
+            m_RendererData = null;
+#endif
 
             return m_RendererData;
         }

@@ -71,7 +71,7 @@ namespace UnityEngine.Experimental.Rendering.LWRP
             }
         }
 
-        void OnCreate()
+        internal void OnCreate()
         {
             m_LightBlendStyles = new Light2DBlendStyle[4];
 
