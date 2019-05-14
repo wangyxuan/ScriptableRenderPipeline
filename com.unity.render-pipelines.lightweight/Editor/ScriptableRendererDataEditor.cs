@@ -91,8 +91,8 @@ namespace UnityEditor.Rendering.LWRP
                 if (element.objectReferenceValue != null)
                 {
                     var name = element.objectReferenceValue.name;
-                    string nameSpace = element.objectReferenceValue.GetType().Namespace;
-                    if (nameSpace != null && nameSpace.Contains("Experimental"))
+                    var elementNamespace = element.objectReferenceValue.GetType().Namespace;
+                    if (elementNamespace != null && elementNamespace.Contains("Experimental"))
                         name += " (Experimental)";
                     GUIContent header = new GUIContent(name,
                         element.objectReferenceValue.GetType().Name);
