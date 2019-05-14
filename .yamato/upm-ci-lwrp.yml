@@ -13,7 +13,7 @@ mobiles:
   - name: Android
     type: Unity::mobile::android
     image: mobile/android-execution:latest
-    flavor: m1.large
+    flavor: b1.large
 testplatforms:
   - name: Standalone
     args: --suite=playmode --platform=Standalone
