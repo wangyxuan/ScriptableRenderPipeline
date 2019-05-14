@@ -5,9 +5,9 @@ using UnityEditor.VersionControl;
 
 namespace UnityEditor.ShaderGraph
 {
-    public class FileUtilities
+    static class FileUtilities
     {
-        public static bool WriteShaderGraphToDisk<T>(string path, T data, bool prettyPrint = false)
+        public static bool WriteShaderGraphToDisk<T>(string path, T data)
         {
             if (data == null)
             {
@@ -18,7 +18,7 @@ namespace UnityEditor.ShaderGraph
 
             try
             {
-                File.WriteAllText(path, EditorJsonUtility.ToJson(data, prettyPrint));
+                File.WriteAllText(path, EditorJsonUtility.ToJson(data, true));
             }
             catch (Exception e)
             {
@@ -27,7 +27,7 @@ namespace UnityEditor.ShaderGraph
                 {
                         FileInfo fileInfo = new FileInfo(path);
                         fileInfo.IsReadOnly = false;
-                        File.WriteAllText(path, EditorJsonUtility.ToJson(data, prettyPrint));
+                        File.WriteAllText(path, EditorJsonUtility.ToJson(data, true));
                         return true;
                 }
                 Debug.LogException(e);

@@ -464,7 +464,7 @@ namespace UnityEditor.ShaderGraph.Drawing
 
         void UpdateShaderGraphOnDisk(string path)
         {
-            if(FileUtilities.WriteShaderGraphToDisk(path, graphObject.graph, true))
+            if(FileUtilities.WriteShaderGraphToDisk(path, graphObject.graph))
                 AssetDatabase.ImportAsset(path);
         }
 
