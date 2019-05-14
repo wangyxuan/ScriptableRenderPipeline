@@ -213,7 +213,6 @@ float3 ComputeFresnel0(float3 baseColor, float metallic, float dielectricF0)
 // ref https://www.gamedev.net/topic/678043-how-to-blend-world-space-normals/#entry5287707
 // assume compositing in world space
 // Note: Using vtxNormal = real3(0, 0, 1) give the BlendNormalRNM formulation.
-// TODO: Untested
 real3 BlendNormalWorldspaceRNM(real3 n1, real3 n2, real3 vtxNormal)
 {
     // Build the shortest-arc quaternion

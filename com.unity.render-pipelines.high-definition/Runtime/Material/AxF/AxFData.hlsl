@@ -20,8 +20,8 @@ void ApplyDecalToSurfaceData(DecalSurfaceData decalSurfaceData, inout SurfaceDat
     if (decalSurfaceData.HTileMask & DBUFFERHTILEBIT_NORMAL)
     {
         // Affect both normal and clearcoat normal
-        surfaceData.normalWS.xyz = normalize(surfaceData.normalWS.xyz * decalSurfaceData.normalWS.w + decalSurfaceData.normalWS.xyz);
-        surfaceData.clearcoatNormalWS = normalize(surfaceData.clearcoatNormalWS.xyz * decalSurfaceData.normalWS.w + decalSurfaceData.normalWS.xyz);
+        surfaceData.normalWS.xyz = lerp(BlendNormalWorldspaceRNM(surfaceData.normalWS.xyz, decalSurfaceData.normalWS.xyz, surfaceData.geomNormalWS), surfaceData.normalWS.xyz, decalSurfaceData.normalWS.w);
+        surfaceData.clearcoatNormalWS = lerp(BlendNormalWorldspaceRNM(surfaceData.clearcoatNormalWS.xyz, decalSurfaceData.normalWS.xyz, surfaceData.geomNormalWS), surfaceData.clearcoatNormalWS.xyz, decalSurfaceData.normalWS.w);
     }
 
     if (decalSurfaceData.HTileMask & DBUFFERHTILEBIT_MASK)

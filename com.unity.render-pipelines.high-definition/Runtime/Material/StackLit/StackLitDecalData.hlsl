@@ -8,7 +8,7 @@ void ApplyDecalToSurfaceData(DecalSurfaceData decalSurfaceData, inout SurfaceDat
 
     if (decalSurfaceData.HTileMask & DBUFFERHTILEBIT_NORMAL)
     {
-        surfaceData.normalWS.xyz = normalize(surfaceData.normalWS.xyz * decalSurfaceData.normalWS.w + decalSurfaceData.normalWS.xyz);
+        surfaceData.normalWS.xyz = lerp(BlendNormalWorldspaceRNM(surfaceData.normalWS.xyz, decalSurfaceData.normalWS.xyz, surfaceData.geomNormalWS), surfaceData.normalWS.xyz, decalSurfaceData.normalWS.w);
     }
 
     // TODOTODO: _MATERIAL_FEATURE_SPECULAR_COLOR and _MATERIAL_FEATURE_HAZY_GLOSS

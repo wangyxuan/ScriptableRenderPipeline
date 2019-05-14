@@ -155,7 +155,7 @@ $include("SharedCode.template.hlsl")
 
         if (decalSurfaceData.HTileMask & DBUFFERHTILEBIT_NORMAL)
         {
-            surfaceData.normalWS.xyz = normalize(surfaceData.normalWS.xyz * decalSurfaceData.normalWS.w + decalSurfaceData.normalWS.xyz);
+            surfaceData.normalWS.xyz = lerp(BlendNormalWorldspaceRNM(surfaceData.normalWS.xyz, decalSurfaceData.normalWS.xyz, surfaceData.geomNormalWS), surfaceData.normalWS.xyz, decalSurfaceData.normalWS.w);
         }
 
         if (decalSurfaceData.HTileMask & DBUFFERHTILEBIT_MASK)
