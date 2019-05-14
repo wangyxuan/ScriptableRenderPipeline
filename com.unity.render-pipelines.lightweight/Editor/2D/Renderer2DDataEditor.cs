@@ -1,11 +1,19 @@
+using UnityEditor.Rendering.LWRP;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering.LWRP;
 
 namespace UnityEditor.Experimental.Rendering.LWRP
 {
     [CustomEditor(typeof(Renderer2DData), true)]
-    internal class Renderer2DDataEditor : Editor
+    internal class Renderer2DDataEditor : ScriptableRendererDataEditor
     {
+        internal override bool overridePipelineAssetEditor => true;
+
+        internal override void OnPipelineAssetEditorGUI(LightweightRenderPipelineAssetEditor pipelineAssetEditor)
+        {
+            pipelineAssetEditor.DrawQualitySettings();
+        }
+
         class Styles
         {
             public static readonly GUIContent hdrEmulationScale = EditorGUIUtility.TrTextContent("HDR Emulation Scale", "Describes the scaling used by lighting to remap dynamic range between LDR and HDR");

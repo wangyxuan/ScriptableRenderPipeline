@@ -127,6 +127,14 @@ namespace UnityEditor.Rendering.LWRP
                 DrawAdvancedSettings();
             }
 
+            // TODO: Only show renderer data editor when the renderer data asset is a sub-asset of the pipeline asset.
+            if (m_RendererDataEditor != null)
+            {
+                EditorGUILayout.BeginFoldoutHeaderGroup(true, "Renderer Data");
+                m_RendererDataEditor.OnInspectorGUI();
+                EditorGUILayout.EndFoldoutHeaderGroup();
+            }
+
             serializedObject.ApplyModifiedProperties();
         }
 
