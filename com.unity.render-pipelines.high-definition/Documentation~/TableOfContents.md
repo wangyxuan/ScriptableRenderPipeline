@@ -1,5 +1,4 @@
 * [High Definition Render Pipeline](index)
-* [Feature Overview](HDRP-Features)
 * Getting started
   * [Getting Started with HDRP](Getting-started-with-HDRP)
   * [Upgrading to HDRP](Upgrading-To-HDRP)

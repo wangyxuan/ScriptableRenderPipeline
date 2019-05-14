@@ -47,7 +47,7 @@ HDRP comes with three built-in [sky types](HDRP-Features.html#SkyOverview.html):
 - [Gradient Sky](Override-Gradient-Sky.html)
 - [Procedural Sky](Override-Procedural-Sky.html)
 
-HDRP allows you to implement your own sky types that display a background and handle environment lighting. See the [Customizing HDRP](https://github.com/Unity-Technologies/ScriptableRenderPipeline/wiki/Writing-A-Custom-Sky-Renderer) documentation for instructions on how to implement your own sky.
+HDRP allows you to implement your own sky types that display a background and handle environment lighting. See the [Customizing HDRP](Creating-a-Custom-Sky.html) documentation for instructions on how to implement your own sky.
 
 ## **Reflections**
 
