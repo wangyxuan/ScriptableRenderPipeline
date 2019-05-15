@@ -6,10 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [7.0.0-preview] - 2019-XX-XX
 ### Added
-- Added menu option to create a new `ScriptableRendererFeature` script. In order to do so, click on Asset/Create/Rendering/Lightweight Render Pipeline/Renderer Feature.
+- Added a menu option to create a new `ScriptableRendererFeature` script. To do so in the Editor, click on Asset > Create > Rendering > Lightweight Render Pipeline > Renderer Feature.
 
 ### Changed
-- Updated `ScriptableRendererFeature` and `ScriptableRenderPass` api docs.
+- Updated `ScriptableRendererFeature` and `ScriptableRenderPass` API docs.
 
 ### Fixed
 - Fixed NullReference exception caused when trying to add a ScriptableRendererFeature.
