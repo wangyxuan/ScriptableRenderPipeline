@@ -63,7 +63,6 @@ namespace UnityEngine.Experimental.Rendering.LWRP
             public override void Action(int instanceId, string pathName, string resourceFile)
             {
                 var instance = CreateInstance<Renderer2DData>();
-                instance.OnCreate();
                 AssetDatabase.CreateAsset(instance, pathName);
                 Selection.activeObject = instance;
 
@@ -71,7 +70,7 @@ namespace UnityEngine.Experimental.Rendering.LWRP
             }
         }
 
-        internal void OnCreate()
+        void Reset()
         {
             m_LightBlendStyles = new Light2DBlendStyle[4];
 

@@ -234,7 +234,6 @@ namespace UnityEngine.Rendering.LWRP
                             var renderer2DData = CreateInstance<Renderer2DData>();
                             renderer2DData.name = "Embedded 2D Renderer Data";
                             renderer2DData.hideFlags = HideFlags.HideInHierarchy;
-                            renderer2DData.OnCreate();
                             AssetDatabase.AddObjectToAsset(renderer2DData, this);
                             m_RendererData = renderer2DData;
                         }
