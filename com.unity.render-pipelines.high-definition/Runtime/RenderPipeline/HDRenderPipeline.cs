@@ -3133,7 +3133,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             }
             else
             {
-                // TODO: This final Gaussian pyramid can be reused by SSR in the future, so disable it only if there is no distortion
+                // This final Gaussian pyramid can be reused by SSR, so disable it only if there is no distortion
                 if (!hdCamera.frameSettings.IsEnabled(FrameSettingsField.Distortion) && !hdCamera.frameSettings.IsEnabled(FrameSettingsField.SSR))
                     return;
             }
