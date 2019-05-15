@@ -1,13 +1,16 @@
 using System;
-using System.Linq;
-using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.Rendering.LWRP;
+using UnityEngine.Rendering;
 
 namespace UnityEditor.Rendering.LWRP
 {
     static class EditorUtils
     {
+        // Each group is separate in the menu by a menu bar
+        public const int lwrpAssetCreateMenuPriorityGroup1 = CoreUtils.assetCreateMenuPriority1;
+        public const int lwrpAssetCreateMenuPriorityGroup2 = CoreUtils.assetCreateMenuPriority1 + 50;
+        public const int lwrpAssetCreateMenuPriorityGroup3 = lwrpAssetCreateMenuPriorityGroup2 + 50;
+
         internal class Styles
         {
             //Measurements
