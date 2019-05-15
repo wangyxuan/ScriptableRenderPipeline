@@ -306,6 +306,7 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
         private ComputeShader clearDispatchIndirectShader { get { return m_Resources.shaders.clearDispatchIndirectCS; } }
         private ComputeShader deferredComputeShader { get { return m_Resources.shaders.deferredCS; } }
         private ComputeShader contactShadowComputeShader { get { return m_Resources.shaders.contactShadowCS; } }
+        private ComputeShader vxShadowComputeShader { get { return m_Resources.shaders.vxShadowCS; } } //seongdae;vxsm
         private Shader screenSpaceShadowsShader { get { return m_Resources.shaders.screenSpaceShadowPS; } }
 
         private Shader deferredTilePixelShader { get { return m_Resources.shaders.deferredTilePS; } }
@@ -610,12 +611,12 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
             s_deferredContactShadowKernel = contactShadowComputeShader.FindKernel("DeferredContactShadow");
             s_deferredContactShadowKernelMSAA = contactShadowComputeShader.FindKernel("DeferredContactShadowMSAA");
 
-            s_deferredVxShadowNearestKernel = screenSpaceShadowComputeShader.FindKernel("DeferredVxShadowNearest"); //seongdae;vxsm
-            s_deferredVxShadowBilinearKernel = screenSpaceShadowComputeShader.FindKernel("DeferredVxShadowBilinear"); //seongdae;vxsm
-            s_deferredVxShadowTrilinearKernel = screenSpaceShadowComputeShader.FindKernel("DeferredVxShadowTrilinear"); //seongdae;vxsm
-            s_deferredVxShadowNearestKernelMSAA = screenSpaceShadowComputeShader.FindKernel("DeferredVxShadowNearestMSAA"); //seongdae;vxsm
-            s_deferredVxShadowBilinearKernelMSAA = screenSpaceShadowComputeShader.FindKernel("DeferredVxShadowBilinearMSAA"); //seongdae;vxsm
-            s_deferredVxShadowTrilinearKernelMSAA = screenSpaceShadowComputeShader.FindKernel("DeferredVxShadowTrilinearMSAA"); //seongdae;vxsm
+            s_deferredVxShadowNearestKernel = vxShadowComputeShader.FindKernel("DeferredVxShadowNearest"); //seongdae;vxsm
+            s_deferredVxShadowBilinearKernel = vxShadowComputeShader.FindKernel("DeferredVxShadowBilinear"); //seongdae;vxsm
+            s_deferredVxShadowTrilinearKernel = vxShadowComputeShader.FindKernel("DeferredVxShadowTrilinear"); //seongdae;vxsm
+            s_deferredVxShadowNearestKernelMSAA = vxShadowComputeShader.FindKernel("DeferredVxShadowNearestMSAA"); //seongdae;vxsm
+            s_deferredVxShadowBilinearKernelMSAA = vxShadowComputeShader.FindKernel("DeferredVxShadowBilinearMSAA"); //seongdae;vxsm
+            s_deferredVxShadowTrilinearKernelMSAA = vxShadowComputeShader.FindKernel("DeferredVxShadowTrilinearMSAA"); //seongdae;vxsm
 
             for (int variant = 0; variant < LightDefinitions.s_NumFeatureVariants; variant++)
             {
@@ -2863,19 +2864,19 @@ namespace UnityEngine.Experimental.Rendering.HDPipeline
 
                 m_ShadowManager.BindResources(cmd);
 
-                cmd.SetComputeBufferParam(screenSpaceShadowComputeShader, kernel, HDShaderIDs._VxShadowMapsBuffer, VxShadowMapsManager.Instance.VxShadowMapsBuffer);
-                cmd.SetComputeBufferParam(screenSpaceShadowComputeShader, kernel, HDShaderIDs._DirectionalLightDatas, m_DirectionalLightDatas);
+                cmd.SetComputeBufferParam(vxShadowComputeShader, kernel, HDShaderIDs._VxShadowMapsBuffer, VxShadowMapsManager.Instance.VxShadowMapsBuffer);
+                cmd.SetComputeBufferParam(vxShadowComputeShader, kernel, HDShaderIDs._DirectionalLightDatas, m_DirectionalLightDatas);
 
                 // Inject the texture in the adequate slot
-                cmd.SetComputeTextureParam(screenSpaceShadowComputeShader, kernel, hdCamera.frameSettings.IsEnabled(FrameSettingsField.MSAA) ? HDShaderIDs._CameraDepthValuesTexture : HDShaderIDs._CameraDepthTexture, depthTexture);
+                cmd.SetComputeTextureParam(vxShadowComputeShader, kernel, hdCamera.frameSettings.IsEnabled(FrameSettingsField.MSAA) ? HDShaderIDs._CameraDepthValuesTexture : HDShaderIDs._CameraDepthTexture, depthTexture);
 
-                cmd.SetComputeTextureParam(screenSpaceShadowComputeShader, kernel, HDShaderIDs._DeferredShadowTextureUAV, deferredShadowRT);
+                cmd.SetComputeTextureParam(vxShadowComputeShader, kernel, HDShaderIDs._VxShadowTextureUAV, deferredShadowRT);
 
-                int deferredShadowTileSize = 16; // Must match DeferreDirectionalShadow.compute
+                int deferredShadowTileSize = 16; // Must match VxShadows.compute
                 int numTilesX = (hdCamera.actualWidth  + (deferredShadowTileSize - 1)) / deferredShadowTileSize;
                 int numTilesY = (hdCamera.actualHeight + (deferredShadowTileSize - 1)) / deferredShadowTileSize;
 
-                cmd.DispatchCompute(screenSpaceShadowComputeShader, kernel, numTilesX, numTilesY, hdCamera.computePassCount);
+                cmd.DispatchCompute(vxShadowComputeShader, kernel, numTilesX, numTilesY, hdCamera.computePassCount);
             }
         }
         //seongdae;vxsm

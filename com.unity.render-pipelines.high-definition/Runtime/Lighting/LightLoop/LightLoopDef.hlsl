@@ -346,20 +346,6 @@ uint PackContactShadowData(float fade, uint mask)
     return fadeAsByte | mask;
 }
 
-//seongdae;vxsm
-void UnpackVxShadowData(uint vxShadowData, out float shadowing)
-{
-    shadowing = (float)vxShadowData / 65535.0;
-}
-
-uint PackVxShadowData(float shadowing)
-{
-    uint shadowingAsUint16 = shadowing * 65535.0;
-
-    return shadowingAsUint16;
-}
-//seongdae;vxsm
-
 // We always fetch the screen space shadow texture to reduce the number of shader variant, overhead is negligible,
 // it is a 1x1 white texture if deferred directional shadow and/or contact shadow are disabled
 // We perform a single featch a the beginning of the lightloop
@@ -381,10 +367,7 @@ float GetContactShadow(LightLoopContext lightLoopContext, int contactShadowMask)
 //seongdae;vxsm
 void InitVxShadow(PositionInputs posInput, inout LightLoopContext context)
 {
-    uint vxShadowData = LOAD_TEXTURE2D_X(_VxShadowTexture, posInput.positionSS).x;
-    float vxShadowing;
-
-    UnpackVxShadowData(vxShadowData, vxShadowing);
+    float vxShadowing = LOAD_TEXTURE2D_X(_VxShadowTexture, posInput.positionSS).x;
     context.vxShadowValue = 1.0 - vxShadowing;
 }
 
