@@ -186,6 +186,21 @@ namespace UnityEditor.Rendering.LWRP
 
         void OnDisable()
         {
+            DestroyRendererDataEditor();
+        }
+
+        bool IsRendererDataASubAsset()
+        {
+            ScriptableRendererData rendererData = m_RendererDataProp.objectReferenceValue as ScriptableRendererData;
+
+            if (rendererData == null)
+                return false;
+            else
+                return AssetDatabase.GetAssetPath(rendererData) == AssetDatabase.GetAssetPath(target);
+        }
+
+        void DestroyRendererDataEditor()
+        {
             if (m_RendererDataEditor != null)
             {
                 DestroyImmediate(m_RendererDataEditor);
@@ -224,28 +239,33 @@ namespace UnityEditor.Rendering.LWRP
 
             if (m_RecreateRendererDataEditor && Event.current.type == EventType.Layout)
             {
-                Editor editor = m_RendererDataEditor;
-                CreateCachedEditor(m_RendererDataProp.objectReferenceValue, null, ref editor);
-
-                if (editor != null && (editor as ScriptableRendererDataEditor) == null)
-                {
-                    DestroyImmediate(editor);
-                    m_RendererDataEditor = null;
-                }
+                if (!IsRendererDataASubAsset())
+                    DestroyRendererDataEditor();
                 else
-                    m_RendererDataEditor = editor as ScriptableRendererDataEditor;
-
-                if (m_RendererDataEditor != null)
                 {
-                    m_RendererDataEditor.OnCreatedFromPipelineAssetEditor(this);
-                    m_RelatedSettingsOnly = m_RendererDataEditor.overridePipelineAssetEditor;
+                    Editor editor = m_RendererDataEditor;
+                    CreateCachedEditor(m_RendererDataProp.objectReferenceValue, null, ref editor);
+
+                    if (editor != null && (editor as ScriptableRendererDataEditor) == null)
+                    {
+                        DestroyImmediate(editor);
+                        m_RendererDataEditor = null;
+                    }
+                    else
+                        m_RendererDataEditor = editor as ScriptableRendererDataEditor;
+
+                    if (m_RendererDataEditor != null)
+                    {
+                        m_RendererDataEditor.OnCreatedFromPipelineAssetEditor(this);
+                        m_RelatedSettingsOnly = m_RendererDataEditor.overridePipelineAssetEditor;
+                    }
                 }
 
                 m_RecreateRendererDataEditor = false;
             }
 
             if (m_RendererDataEditor != null && m_RendererDataEditor.overridePipelineAssetEditor)
-                m_RelatedSettingsOnly = EditorGUILayout.Toggle(Styles.relatedSettingsOnly, m_RelatedSettingsOnly);
+                m_RelatedSettingsOnly = GUILayout.Toggle(m_RelatedSettingsOnly, Styles.relatedSettingsOnly, EditorStyles.miniButton, GUILayout.Width(150.0f));
 
             EditorGUI.indentLevel--;
         }
