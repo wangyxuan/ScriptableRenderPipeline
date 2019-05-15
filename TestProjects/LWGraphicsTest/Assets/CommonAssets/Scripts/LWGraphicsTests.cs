@@ -35,6 +35,8 @@ public class LWGraphicsTests
         for (int i = 0; i < settings.WaitFrames; i++)
             yield return null;
 
+        XRSettings.enabled = false;
+
         if (scene.name.Substring(3, 4).CompareTo("_xr_") == 0)
         {
             Assume.That((Application.platform != RuntimePlatform.OSXEditor && Application.platform != RuntimePlatform.OSXPlayer), "Stereo LWRP tests do not run on MacOSX.");
