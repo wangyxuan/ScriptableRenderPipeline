@@ -439,6 +439,17 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline.Drawing
                     });
                 });
             }
+            if (m_Node.coat.isOn)
+            {
+                ps.Add(new PropertyRow(CreateLabel("Honor Per Light Max Smoothness", indentLevel)), (row) =>
+                {
+                    row.Add(new Toggle(), (toggle) =>
+                    {
+                        toggle.value = m_Node.honorPerLightMinRoughness.isOn;
+                        toggle.OnToggleChanged(ChangeHonorPerLightMinRoughness);
+                    });
+                });
+            }
             if (m_Node.coat.isOn || m_Node.iridescence.isOn)
             {
                 --indentLevel; // Per Punctual/Directional Lights:
@@ -772,6 +783,14 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline.Drawing
             ToggleData td = m_Node.recomputeStackPerLight;
             td.isOn = evt.newValue;
             m_Node.recomputeStackPerLight = td;
+        }
+
+        void ChangeHonorPerLightMinRoughness(ChangeEvent<bool> evt)
+        {
+            m_Node.owner.owner.RegisterCompleteObjectUndo("HonorPerLightMinRoughness Change");
+            ToggleData td = m_Node.honorPerLightMinRoughness;
+            td.isOn = evt.newValue;
+            m_Node.honorPerLightMinRoughness = td;
         }
 
         void ChangeShadeBaseUsingRefractedAngles(ChangeEvent<bool> evt)
