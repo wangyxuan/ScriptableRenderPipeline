@@ -365,15 +365,12 @@ float GetContactShadow(LightLoopContext lightLoopContext, int contactShadowMask)
 }
 
 //seongdae;vxsm
-void InitVxShadow(PositionInputs posInput, inout LightLoopContext context)
+float GetSunVxShadow(PositionInputs posInput, DirectionalLightData light)
 {
-    float vxShadowing = LOAD_TEXTURE2D_X(_VxShadowTexture, posInput.positionSS).x;
-    context.vxShadowValue = 1.0 - vxShadowing;
-}
+    if (light.vxShadowsBitset == 0)
+        return 1.0;
 
-float GetVxShadow(LightLoopContext lightLoopContext)
-{
-    return lightLoopContext.vxShadowValue;
+    return LOAD_TEXTURE2D_X(_VxShadowTexture, posInput.positionSS).x;
 }
 //seongdae;vxsm
 

@@ -488,6 +488,11 @@ bool IsVxShadowsEnabled(uint vxShadowsBitset)
     return MaskBitsetVxShadowsType(vxShadowsBitset) != 0x00000000;
 }
 
+bool IsVxShadowsDisabled(uint vxShadowsBitset)
+{
+    return MaskBitsetVxShadowsType(vxShadowsBitset) == 0x00000000;
+}
+
 bool IsVxShadowsOnly(uint vxShadowsBitset)
 {
     return MaskBitsetVxShadowsType(vxShadowsBitset) == VX_SHADOWS_ONLY;

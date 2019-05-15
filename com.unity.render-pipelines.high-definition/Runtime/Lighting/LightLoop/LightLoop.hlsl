@@ -102,9 +102,6 @@ void LightLoop( float3 V, PositionInputs posInput, PreLightData preLightData, BS
     // Initialize the contactShadow and contactShadowFade fields
     InitContactShadow(posInput, context);
 
-    // Initialize vx shadow //seongdae;vxsm
-    InitVxShadow(posInput, context); //seongdae;vxsm
-
     // First of all we compute the shadow value of the directional light to reduce the VGPR pressure
     if (featureFlags & LIGHTFEATUREFLAGS_DIRECTIONAL)
     {
@@ -143,9 +140,12 @@ void LightLoop( float3 V, PositionInputs posInput, PreLightData preLightData, BS
             if (evaluateShadows)
             {
                 context.shadowValue = EvaluateRuntimeSunShadow(context, posInput, light, shadowBiasNormal);
+                context.vxShadowValue = GetSunVxShadow(posInput, light); //seongdae;vxsm
             }
 #else
+        DirectionalLightData light = _DirectionalLightDatas[_DirectionalShadowIndex]; //seongdae;vxsm
         context.shadowValue = GetScreenSpaceShadow(posInput);
+        context.vxShadowValue = GetSunVxShadow(posInput, light); //seongdae;vxsm
 #endif
         }
     }
