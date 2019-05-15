@@ -73,7 +73,7 @@ namespace UnityEngine.Rendering.LWRP
     {
         Custom,
         ForwardRenderer,
-        Renderer2D
+        _2DRenderer
     }
 
     public class LightweightRenderPipelineAsset : RenderPipelineAsset, ISerializationCallbackReceiver
@@ -214,7 +214,7 @@ namespace UnityEngine.Rendering.LWRP
 #if UNITY_EDITOR
             switch (m_RendererType)
             {
-                case RendererType.Renderer2D:
+                case RendererType._2DRenderer:
                     {
                         var pipelineAssetPath = AssetDatabase.GetAssetPath(this);
                         var allSubAssets = AssetDatabase.LoadAllAssetsAtPath(pipelineAssetPath);
