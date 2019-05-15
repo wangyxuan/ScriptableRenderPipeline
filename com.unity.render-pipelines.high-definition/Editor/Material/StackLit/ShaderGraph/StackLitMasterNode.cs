@@ -75,6 +75,8 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
         public const string SOFixupStrengthFactorSlotName = "SOConeFixupStrength";
         public const string SOFixupMaxAddedRoughnessSlotName = "SOConeFixupMaxAddedRoughness";
 
+        public const string DepthOffsetSlotName = "DepthOffset";
+
         public const int PositionSlotId = 0;
         public const int BaseColorSlotId = 1;
         public const int NormalSlotId = 2;
@@ -126,6 +128,7 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
         // TODO: we would ideally need one value per lobe
         //public const int SpecularOcclusionSlotId = ; // for custom (external) SO replacing data based SO (which comes from DataBasedSOMode(dataAO, optional bent normal))
 
+        public const int DepthOffsetSlotId = 42;
 
         // In StackLit.hlsl engine side
         //public enum BaseParametrization
@@ -801,6 +804,22 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 Dirty(ModificationScope.Topological);
             }
         }
+        
+        [SerializeField]
+        bool m_depthOffset;
+
+        public ToggleData depthOffset
+        {
+            get { return new ToggleData(m_depthOffset); }
+            set
+            {
+                if (m_depthOffset == value.isOn)
+                    return;
+                m_depthOffset = value.isOn;
+                UpdateNodeAfterDeserialization();
+                Dirty(ModificationScope.Topological);
+            }
+        }
 
         public StackLitMasterNode()
         {
@@ -1025,6 +1044,12 @@ namespace UnityEditor.Experimental.Rendering.HDPipeline
                 validSlots.Add(LightingSlotId);
                 AddSlot(new DefaultMaterialSlot(BackLightingSlotId, BakedBackGISlotName, BakedBackGISlotName, ShaderStageCapability.Fragment));
                 validSlots.Add(BackLightingSlotId);
+            }
+
+            if (depthOffset.isOn)
+            {
+                AddSlot(new Vector1MaterialSlot(DepthOffsetSlotId, DepthOffsetSlotName, DepthOffsetSlotName, SlotType.Input, 0.0f, ShaderStageCapability.Fragment));
+                validSlots.Add(DepthOffsetSlotId);
             }
 
             RemoveSlotsNameNotMatching(validSlots, true);
