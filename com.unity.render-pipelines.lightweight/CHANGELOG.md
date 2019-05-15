@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [7.0.0-preview] - 2019-XX-XX
+### Added
+- Added menu option to create a new `ScriptableRendererFeature` script. In order to do so, click on Asset/Create/Rendering/Lightweight Render Pipeline/Renderer Feature.
+
+### Changed
+- Updated `ScriptableRendererFeature` and `ScriptableRenderPass` api docs.
+
+### Fixed
+- Fixed NullReference exception caused when trying to add a ScriptableRendererFeature.
 
 ## [6.7.0-preview] - 2019-05-16
 ### Added
